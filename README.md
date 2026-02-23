@@ -23,8 +23,7 @@
 - Composite statistics (statistics depending on other statistics)
 - Statistics-triggered configurable alerts
 - UI interface and admin routes for full statistics lifecycle management
-- Caching and scheduled recalculation
-
+- Caching for optimized performance
 
 ## Installation
 
