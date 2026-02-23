@@ -43,6 +43,7 @@ Add the plugin to your `medusa-config.ts`:
 modules: [
   {
     resolve: "medusa-stats/modules/statistics",
+    dependencies: [ContainerRegistrationKeys.QUERY], // Query dependency is required in order to be injected into the providers
     options: {
       providers: [
         {
@@ -264,3 +265,42 @@ type StatisticsAlertEventData = {
 }
 ```
 
+## Caching
+In order to optimize performance, statistic results are cached for a configurable amount of time. When a statistic is requested, the module first checks if a valid cached result exists and returns it if available. If not, it calculates the statistic, stores the result in the cache, and then returns it.
+
+### Cache Configuration
+To use caching, `CachingModule` must be enabled in the Medusa project.
+
+```ts
+{
+  resolve: "@medusajs/medusa/caching",
+  options: {
+    providers: [
+      {
+        resolve: "@medusajs/caching-redis",
+        id: "caching-redis",
+        is_default: true,
+        options: {
+          redisUrl: process.env.CACHE_REDIS_URL,
+        },
+      },
+    ],
+  },
+},
+```
+
+The CachingModule's feature flag needs to be enabled as well:
+
+*in `.env` file:*
+```env
+MEDUSA_FF_CACHING=true
+```
+
+or
+
+*in `medusa-config.ts`:*
+```ts
+featureFlags: {
+  caching: true,
+}
+```

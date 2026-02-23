@@ -4,7 +4,6 @@ import StatisticsService from "../../../modules/statistics/service";
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils";
 import { logger, Query } from "@medusajs/framework";
 import { hasCompleteData, mergeParameters, validateParameters } from "../utils/parameter-utils";
-import { ICacheService } from "@medusajs/framework/types";
 import { generateStatisticCacheKey, isCachingEnabled, getEffectiveCacheTTL } from "../utils/cache-utils";
 import { DependencyGraphUtils } from "../utils/dependency-graph";
 
@@ -35,7 +34,13 @@ export const calculateStatisticsStep = createStep(
     async (input: CalculateStatisticsInput, { container }) => {
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
         const query = container.resolve<Query>(ContainerRegistrationKeys.QUERY);
-        const cacheService = container.resolve(Modules.CACHING);
+        let cacheService: any | undefined;
+
+        try {
+            cacheService = container.resolve(Modules.CACHING);
+        } catch {
+            cacheService = undefined;
+        }
 
         const {
             options: inputOptions,
@@ -163,7 +168,7 @@ export const calculateStatisticsStep = createStep(
                             statDefinition.parameters.fields
                         );
 
-                        const cachingEnabled = isCachingEnabled(
+                        const cachingEnabled = !!cacheService && isCachingEnabled(
                             depOption.cache_options as any,
                             sharedCacheOptions as any
                         );
@@ -285,7 +290,7 @@ export const calculateStatisticsStep = createStep(
                 );
 
 
-                const cachingEnabled = isCachingEnabled(
+                const cachingEnabled = !!cacheService && isCachingEnabled(
                     fullOption.cache_options as any,
                     sharedCacheOptions as any
                 );
