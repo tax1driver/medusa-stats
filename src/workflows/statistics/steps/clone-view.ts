@@ -16,13 +16,13 @@ export const cloneViewStep = createStep(
     async (input: CloneViewInput, { container }) => {
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Fetch source view with charts and statistics
+
         const sourceView = await statisticsService.retrieveStatisticsView(
             input.source_view_id,
             { relations: ["charts", "charts.statistics"] }
         );
 
-        // Create new view
+
         const newView = await statisticsService.createStatisticsViews({
             name: input.new_name,
             description: input.new_description || sourceView.description,
@@ -40,7 +40,7 @@ export const cloneViewStep = createStep(
             }
         }
 
-        // Clone all options referenced by source view charts
+
         const clonedOptions = await Promise.all(
             Array.from(uniqueOptionsById.values()).map(async (option: any) => {
                 return await statisticsService.createStatisticsOptions({
@@ -62,7 +62,7 @@ export const cloneViewStep = createStep(
 
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Delete cloned view (this will cascade to options)
+
         await statisticsService.deleteStatisticsViews(viewId);
     }
 );

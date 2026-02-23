@@ -49,7 +49,7 @@ export const ChartCard = ({
     const queryClient = useQueryClient()
     const [isEditOpen, setIsEditOpen] = useState(false)
 
-    // Attach results to statistics
+
     const statisticsWithResults = (chart.statistics || []).map((stat: StatisticsOption) => ({
         ...stat,
         result: results?.[stat.id],
@@ -57,12 +57,12 @@ export const ChartCard = ({
     }));
 
 
-    // Check if all statistics have errors
+
     const allErrors = statisticsWithResults.every((stat) =>
         results?.[stat.id] && 'error' in results[stat.id]
     )
 
-    // Collect all warnings
+
     const warnings: string[] = []
     statisticsWithResults.forEach((stat) => {
         if (stat.result?.metadata?.warnings) {
@@ -70,7 +70,7 @@ export const ChartCard = ({
         }
     })
 
-    // Update mutation for batch updating statistics
+
     const updateMutation = useMutation({
         mutationFn: async (updates: Array<{
             optionId: string
@@ -80,7 +80,7 @@ export const ChartCard = ({
             cache_options?: { enabled?: boolean; ttl?: number } | null
             input_dependencies?: InputDependency[]
         }>) => {
-            // Execute all updates
+
             await Promise.all(
                 updates.map(update =>
                     updateOption(update.optionId, {
@@ -107,7 +107,7 @@ export const ChartCard = ({
         }
     })
 
-    // Delete mutation for removing statistics from chart
+
     const deleteStatisticMutation = useMutation({
         mutationFn: (statisticId: string) => removeStatisticFromChart(chart.id, statisticId),
         onSuccess: () => {
@@ -162,7 +162,7 @@ export const ChartCard = ({
                     </DropdownMenu>
                 </div>
 
-                {/* Chart rendering */}
+
                 {isCalculating && (
                     <div className="p-4 bg-ui-bg-subtle rounded">
                         <Skeleton className="h-80 w-full" />
@@ -202,7 +202,7 @@ export const ChartCard = ({
                 )}
             </div>
 
-            {/* Edit Series Drawer */}
+
             <OptionEditDrawer
                 open={isEditOpen}
                 onOpenChange={setIsEditOpen}

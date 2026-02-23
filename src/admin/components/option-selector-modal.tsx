@@ -29,19 +29,19 @@ export const OptionSelector = ({
 }: OptionSelectorProps) => {
     const [searchQuery, setSearchQuery] = useState("")
 
-    // Get available statistics from all providers
+
     const { data: statisticsData, isLoading } = useQuery({
         queryKey: [STATISTICS_QUERY, "providers", "all-statistics"],
         queryFn: () => getAllProviderStatistics(),
         enabled,
     })
 
-    // Filter out excluded statistics and apply search
+
     const filteredStatistics = useMemo(() => {
         if (!statisticsData?.statistics) return []
 
         return statisticsData.statistics.filter((stat) => {
-            // Check if excluded
+
             const isExcluded = excludeStatistics.some(
                 (excluded) =>
                     excluded.provider_id === stat.provider_id &&
@@ -49,7 +49,7 @@ export const OptionSelector = ({
             )
             if (isExcluded) return false
 
-            // Apply search filter
+
             if (searchQuery) {
                 const query = searchQuery.toLowerCase()
                 return (
@@ -63,7 +63,7 @@ export const OptionSelector = ({
         })
     }, [statisticsData, excludeStatistics, searchQuery])
 
-    // Group statistics by provider
+
     const groupedStatistics = useMemo(() => {
         return filteredStatistics.reduce((acc, stat) => {
             if (!acc[stat.provider_id]) {

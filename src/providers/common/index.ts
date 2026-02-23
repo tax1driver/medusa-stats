@@ -19,7 +19,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
 
     async getAvailableStatistics(): Promise<AvailableStatistic[]> {
         return [
-            // ===== CART STATISTICS =====
+
             new StatBuilder("cart_progress_breakdown", "Cart Progress Breakdown")
                 .description("Break down carts by their progress stage")
                 .field({
@@ -95,7 +95,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 .dimension("time")
                 .build(),
 
-            // ===== ORDER STATISTICS =====
+
             new StatBuilder("order_refund_ratio", "Order Refund Ratio")
                 .description("Ratio of refunds to total sales (%)")
                 .field({
@@ -230,7 +230,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 .dimension("category")
                 .build(),
 
-            // ===== SALES STATISTICS =====
+
             new StatBuilder("average_sales", "Average Sales")
                 .description("Average sales value over time")
                 .field({
@@ -335,7 +335,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 .dimension("time")
                 .build(),
 
-            // ===== CUSTOMER STATISTICS =====
+
             new StatBuilder("average_sales_per_customer", "Average Sales per Customer")
                 .description("Average sales value per customer")
                 .field({
@@ -439,7 +439,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 .dimension("time")
                 .build(),
 
-            // ===== PRODUCT STATISTICS =====
+
             new StatBuilder("top_variants", "Top Variants")
                 .description("Top selling product variants")
                 .field({
@@ -522,7 +522,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
         logger.info(`Calculating statistic ${id} from ${periodStart} to ${periodEnd} with interval ${interval}`);
 
         switch (id) {
-            // ===== CART STATISTICS =====
+
 
             case "cart_progress_breakdown": {
                 const includeCompleted = parameters.include_completed ?? false;
@@ -541,7 +541,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     filters
                 });
 
-                // Categorize carts by progress stage
+
                 const breakdown: Record<string, number> = {
                     "Empty": 0,
                     "With Items": 0,
@@ -674,7 +674,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 };
             }
 
-            // ===== ORDER STATISTICS =====
+
 
             case "order_refund_ratio": {
                 const currencyCode = parameters.currency_code;
@@ -693,7 +693,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     filters
                 });
 
-                // Calculate ratio manually per time bucket
+
                 const timeSeries = createTimeSeries(
                     orders,
                     periodStart,
@@ -928,7 +928,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     }
                 });
 
-                // Group orders by customer
+
                 const customerOrders: Record<string, Date[]> = {};
                 for (const order of orders) {
                     if (!customerOrders[order.customer_id]) {
@@ -937,7 +937,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     customerOrders[order.customer_id].push(new Date(order.created_at));
                 }
 
-                // Calculate time differences
+
                 const timeDiffs: number[] = [];
                 for (const dates of Object.values(customerOrders)) {
                     if (dates.length < 2) continue;
@@ -948,7 +948,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     }
                 }
 
-                // Bucket the differences
+
                 const buckets: Record<string, number> = {};
                 for (const diff of timeDiffs) {
                     const bucket = Math.floor(diff / bucketSize) * bucketSize;
@@ -984,7 +984,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 };
             }
 
-            // ===== SALES STATISTICS =====
+
 
             case "average_sales": {
                 const currencyCode = parameters.currency_code;
@@ -1191,7 +1191,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 return { value: timeSeries };
             }
 
-            // ===== CUSTOMER STATISTICS =====
+
 
             case "average_sales_per_customer": {
                 const currencyCode = parameters.currency_code;
@@ -1212,7 +1212,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     filters
                 });
 
-                // Apply segment filtering
+
                 let filteredOrders = orders;
                 if (segment === "new" || segment === "returning") {
                     const customerFirstOrder: Record<string, Date> = {};
@@ -1256,20 +1256,20 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     filters.currency_code = currencyCode;
                 }
 
-                // Get all orders for customers who had orders in the period
+
                 const { data: allOrders } = await this.query.graph({
                     entity: "order",
                     fields: ["id", "customer_id", "created_at", "total"],
                     filters
                 });
 
-                // Calculate lifetime value per customer
+
                 const customerLTV: Record<string, number> = {};
                 for (const order of allOrders) {
                     customerLTV[order.customer_id] = (customerLTV[order.customer_id] || 0) + (order.total || 0);
                 }
 
-                // Filter to customers active in period
+
                 const periodOrders = allOrders.filter((o: any) => {
                     const date = new Date(o.created_at);
                     return date >= new Date(periodStart) && date <= new Date(periodEnd);
@@ -1367,7 +1367,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
 
                     return { value: timeSeries };
                 } else {
-                    // For active/repeat, need order data
+
                     const { data: orders } = await this.query.graph({
                         entity: "order",
                         fields: ["id", "customer_id", "created_at"],
@@ -1416,7 +1416,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     count()
                 );
 
-                // Convert to cumulative
+
                 let cumulative = 0;
                 const cumulativeData = timeSeries.map((point: any) => {
                     cumulative += point.y;
@@ -1429,8 +1429,8 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
             case "customer_retention_rate": {
                 const cohortPeriod = parameters.cohort_period ?? "month";
 
-                // This is a complex calculation requiring cohort analysis
-                // Simplified version: percentage of customers from previous period who ordered again
+
+
 
                 const { data: orders } = await this.query.graph({
                     entity: "order",
@@ -1451,7 +1451,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     }
                 );
 
-                // Calculate retention rate as percentage change
+
                 const retentionData = timeSeries.map((point: any, index: number) => {
                     if (index === 0) return { x: point.x, value: 100 };
                     const previous = timeSeries[index - 1].value;
@@ -1462,7 +1462,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                 return { value: retentionData };
             }
 
-            // ===== PRODUCT STATISTICS =====
+
 
             case "top_variants": {
                 const limit = parameters.limit ?? 20;
@@ -1504,7 +1504,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
             case "top_returned_variants": {
                 const limit = parameters.limit ?? 20;
 
-                // Query returns to get returned items
+
                 const { data: returns } = await this.query.graph({
                     entity: "return",
                     fields: ["id", "items.item_id", "created_at"],
@@ -1513,7 +1513,7 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
                     }
                 });
 
-                // Get the line items that were returned
+
                 const returnedItemIds = new Set(
                     returns.flatMap((ret: any) => (ret.items || []).map((item: any) => item.item_id))
                 );

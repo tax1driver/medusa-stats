@@ -13,12 +13,12 @@ export const manageChartStatisticsStep = createStep(
     async (input: ManageChartStatisticsInput, { container }) => {
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Remove statistics if specified
+
         if (input.remove_statistic_ids && input.remove_statistic_ids.length > 0) {
             await statisticsService.removeStatisticsFromChart(input.chart_id, input.remove_statistic_ids);
         }
 
-        // Add statistics if specified
+
         if (input.add_statistic_ids && input.add_statistic_ids.length > 0) {
             await statisticsService.addStatisticsToChart(input.chart_id, input.add_statistic_ids);
         }
@@ -30,7 +30,7 @@ export const manageChartStatisticsStep = createStep(
 
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Reverse the operations: re-add what was removed, remove what was added
+
         if (original.add_statistic_ids && original.add_statistic_ids.length > 0) {
             await statisticsService.removeStatisticsFromChart(original.chart_id, original.add_statistic_ids);
         }

@@ -2,7 +2,7 @@ import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
 
 export interface ExtractAlertValuesInput {
     alerts: any[];
-    current_values: Record<string, any>; // Keyed by option_id
+    current_values: Record<string, any>;
 }
 
 export interface ExtractedAlertValues {
@@ -28,7 +28,7 @@ export const extractAlertValuesStep = createStep(
             try {
                 let extracted: ExtractedAlertValues;
 
-                // Case 1: Time series (array)
+
                 if (Array.isArray(calculated_value)) {
                     if (calculated_value.length === 0) {
                         logger.warn(`[Alert ${alert.id}] Time series is empty, skipping alert evaluation`);
@@ -40,7 +40,7 @@ export const extractAlertValuesStep = createStep(
                         ? Number(lastItem.value)
                         : Number(lastItem);
 
-                    // Get reference value for relative comparison
+
                     const referenceIndex = calculated_value.length - 1 - lookbackPositions;
                     let reference: number | null = null;
 
@@ -64,7 +64,7 @@ export const extractAlertValuesStep = createStep(
                         canDoRelative: reference !== null
                     };
                 }
-                // Case 2: Single value object { value: number }
+
                 else if (typeof calculated_value === 'object' && calculated_value !== null && 'value' in calculated_value) {
                     extracted = {
                         alert_id: alert.id,
@@ -81,7 +81,7 @@ export const extractAlertValuesStep = createStep(
                         );
                     }
                 }
-                // Case 3: Raw number
+
                 else {
                     extracted = {
                         alert_id: alert.id,
@@ -99,7 +99,7 @@ export const extractAlertValuesStep = createStep(
                     }
                 }
 
-                // Validate that we have valid numeric values
+
                 if (!isFinite(extracted.current)) {
                     logger.warn(`[Alert ${alert.id}] Current value is not a valid number: ${extracted.current}`);
                     continue;

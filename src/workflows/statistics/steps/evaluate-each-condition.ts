@@ -3,7 +3,7 @@ import type { ExtractedAlertValues } from "./extract-alert-values";
 
 export interface EvaluateConditionsInput {
     alerts: any[];
-    extracted_values: Record<string, ExtractedAlertValues>; // Keyed by alert_id
+    extracted_values: Record<string, ExtractedAlertValues>;
 }
 
 export interface AlertEvaluationResult {
@@ -11,7 +11,7 @@ export interface AlertEvaluationResult {
     triggered: boolean;
     current_value: number;
     reference_value: number | null;
-    compare_value: number | [number, number]; // The actual value used for comparison
+    compare_value: number | [number, number];
     operator: string;
     comparison_type: string;
 }
@@ -26,7 +26,7 @@ export const evaluateEachConditionStep = createStep(
             const { condition } = alert;
             const extracted = input.extracted_values[alert.id];
 
-            // Skip if no extracted values
+
             if (!extracted) {
                 logger.warn(`[Alert ${alert.id}] No extracted values, skipping evaluation`);
                 continue;
@@ -36,13 +36,13 @@ export const evaluateEachConditionStep = createStep(
             let compareValue: number | [number, number];
             let triggered = false;
 
-            // Determine what to compare against
+
             if (condition.comparisonType === 'absolute') {
-                // Absolute comparison: compare current vs threshold
+
                 compareValue = condition.threshold;
 
             } else if (condition.comparisonType === 'relative') {
-                // Relative comparison: compare current vs reference value
+
                 if (!extracted.canDoRelative || extracted.reference === null) {
                     logger.warn(
                         `[Alert ${alert.id}] Cannot perform relative comparison. ` +
@@ -54,16 +54,16 @@ export const evaluateEachConditionStep = createStep(
                 const changeType = condition.changeType || 'absolute';
 
                 if (changeType === 'percentage') {
-                    // Calculate percentage change: ((current - reference) / reference) * 100
+
                     if (extracted.reference === 0) {
                         logger.warn(`[Alert ${alert.id}] Cannot calculate percentage change with reference value of 0`);
                         continue;
                     }
                     const percentageChange = ((current - extracted.reference) / extracted.reference) * 100;
-                    // For percentage change, compare against threshold (e.g., "alert if changed by > 10%")
+
                     compareValue = condition.threshold || 0;
 
-                    // Evaluate condition on percentage change
+
                     triggered = evaluateOperator(percentageChange, compareValue, condition.operator);
 
                     evaluationResults.push({
@@ -71,14 +71,14 @@ export const evaluateEachConditionStep = createStep(
                         triggered,
                         current_value: current,
                         reference_value: extracted.reference,
-                        compare_value: percentageChange, // Store the percentage change
+                        compare_value: percentageChange,
                         operator: condition.operator,
                         comparison_type: 'relative_percentage'
                     });
                     continue;
 
                 } else {
-                    // Absolute change: compare current directly to reference
+
                     compareValue = extracted.reference;
                 }
             } else {
@@ -86,7 +86,7 @@ export const evaluateEachConditionStep = createStep(
                 continue;
             }
 
-            // Evaluate condition
+
             triggered = evaluateOperator(current, compareValue, condition.operator);
 
             evaluationResults.push({

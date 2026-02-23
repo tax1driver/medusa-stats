@@ -15,7 +15,7 @@ export async function GET(
         }
     });
 
-    // Flatten the result object into an array
+
     const statistics = Object.values(result).flat();
 
     res.json({ statistics });

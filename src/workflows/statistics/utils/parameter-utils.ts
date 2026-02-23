@@ -40,18 +40,18 @@ export function selectorMatches(
     providerId: string
 ): boolean {
     if (selector.startsWith('@')) {
-        // Local option name match: @name
+
         const pattern = selector.slice(1);
         return wildcardMatch(localOptionName, pattern);
     } else if (selector.includes('.') || selector.includes('*')) {
-        // Provider match: provider.*
+
         const [providerPattern, optionPattern] = selector.split(':');
         if (optionPattern) {
-            // Both provider and option pattern
+
             return wildcardMatch(providerId, providerPattern) &&
                 wildcardMatch(providerOptionName, optionPattern);
         } else {
-            // Just provider pattern with option name as param
+
             return wildcardMatch(providerId, providerPattern);
         }
     }
@@ -71,20 +71,20 @@ export function mergeParameters(
 ): Record<string, any> {
     const merged = { ...optionData };
 
-    // Apply view data with selector matching
+
     for (const [key, value] of Object.entries(viewData)) {
         const [selector, paramName] = parseSelector(key);
 
         if (!paramName) {
-            // No selector, apply to all
+
             merged[key] = value;
         } else if (selector && selectorMatches(selector, localOptionName, providerOptionName, providerId)) {
-            // Selector matches, apply parameter
+
             merged[paramName] = value;
         }
     }
 
-    // Runtime data overrides everything
+
     Object.assign(merged, runtimeData);
 
     return merged;
@@ -201,7 +201,7 @@ export function resolveStatisticDefinition(
 export function hasCompleteData(data: Record<string, any> | null | undefined): boolean {
     if (!data) return false;
 
-    // Check if all values are defined (not null/undefined)
+
     return Object.values(data).every(value =>
         value !== null && value !== undefined
     );

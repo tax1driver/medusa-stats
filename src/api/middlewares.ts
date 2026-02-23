@@ -35,11 +35,11 @@ import {
 
 export default defineMiddlewares({
   routes: [
-    // ============================================
-    // STATISTICS MODULE - Admin Routes
-    // ============================================
 
-    // Provider Routes
+
+
+
+
     {
       matcher: "/admin/statistics/providers",
       method: "GET",
@@ -63,7 +63,7 @@ export default defineMiddlewares({
       })],
     },
 
-    // View Routes
+
     {
       matcher: "/admin/statistics/views",
       method: "GET",
@@ -105,7 +105,7 @@ export default defineMiddlewares({
       middlewares: [validateAndTransformBody(CreateChartSchema)],
     },
 
-    // Chart Routes
+
     {
       matcher: "/admin/statistics/charts/:id",
       method: "GET",
@@ -147,7 +147,7 @@ export default defineMiddlewares({
       middlewares: [validateAndTransformBody(ManageChartStatisticsSchema)],
     },
 
-    // Option Routes
+
     {
       matcher: "/admin/statistics/options",
       method: "GET",
@@ -178,13 +178,13 @@ export default defineMiddlewares({
       method: "POST",
       middlewares: [validateAndTransformBody(CalculateOptionSchema)],
     },
-    // Composite Statistics: Clone option
+
     {
       matcher: "/admin/statistics/options/:id/clone",
       method: "POST",
       middlewares: [validateAndTransformBody(CloneOptionSchema)],
     },
-    // Alert Routes
+
     {
       matcher: "/admin/statistics/alerts",
       method: "GET",
@@ -219,7 +219,7 @@ export default defineMiddlewares({
       })],
     },
 
-    // Alert Log Routes
+
     {
       matcher: "/admin/statistics/alert-logs",
       method: "GET",

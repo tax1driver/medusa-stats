@@ -1,6 +1,6 @@
 import { sdk } from "../sdk"
 
-// Types
+
 export type StatisticsProvider = {
     id: string
     is_enabled: boolean
@@ -9,8 +9,8 @@ export type StatisticsProvider = {
     updated_at: string
 }
 
-// Per-series visualization configuration (on StatisticsOption)
-// Controls how a specific data series renders within a chart
+
+
 export type SeriesVisualizationConfig = {
     chartType?: "line" | "bar" | "area" | "pie"
     color?: string
@@ -25,8 +25,8 @@ export type SeriesVisualizationConfig = {
     [key: string]: any
 }
 
-// Chart-wide visualization configuration (on StatisticsChart)
-// Controls the overall chart container and shared elements
+
+
 export type ChartVisualizationConfig = {
     showLegend?: boolean
     legendPosition?: "top" | "bottom" | "left" | "right"
@@ -100,7 +100,7 @@ export type StatisticsOption = {
     data: Record<string, any>
     visualization_config: SeriesVisualizationConfig | null
     cache_options: { enabled?: boolean; ttl?: number } | null
-    // Composite Statistics fields
+
     parameter_config: Record<string, { value: any; locked: boolean }> | null
     preset: boolean
     created_at: string
@@ -110,7 +110,7 @@ export type StatisticsOption = {
     provider?: StatisticsProvider
     view?: StatisticsView
     charts?: StatisticsChart[]
-    // Composite Statistics relationships
+
     input_dependencies?: InputDependency[]
     dependent_composites?: StatisticsOption[]
 }
@@ -173,13 +173,13 @@ export type ParameterFieldType =
     | "daterange"
     | "currency"
     | "json"
-    | "entity"      // Single entity reference
-    | "entities"    // Multiple entity references
-    | "stat"        // Reference to input dependencies
+    | "entity"
+    | "entities"
+    | "stat"
     | "custom"
 
 export type EntityReference = {
-    entity: string  // Entity type (e.g., "customer", "product", "sales_channel")
+    entity: string
 }
 
 export type ParameterFieldDefinition = {
@@ -188,16 +188,16 @@ export type ParameterFieldDefinition = {
     description?: string
     placeholder?: string
     fieldType: ParameterFieldType
-    // For select/multiselect fields
+
     options?: Array<{
         value: string | number | boolean
         label: string
         description?: string
         disabled?: boolean
     }>
-    // For entity reference fields
+
     entityReference?: EntityReference
-    // Relations and dependencies
+
     dependsOn?: Array<{
         field: string
         condition?: (value: any, allValues: Record<string, any>) => boolean
@@ -218,28 +218,28 @@ export type AvailableStatistic = {
     display: {
         type: "currency" | "number" | "percentage" | "count" | "duration" | "text" | "custom"
         format?: {
-            currency?: string               // ISO currency code (USD, EUR, etc.)
-            decimals?: number               // Number of decimal places
-            prefix?: string                 // Display prefix (e.g., "#", "+")
-            suffix?: string                 // Display suffix (e.g., "/month", "orders")
-            locale?: string                 // Locale for number formatting (en-US, de-DE)
+            currency?: string
+            decimals?: number
+            prefix?: string
+            suffix?: string
+            locale?: string
             notation?: "standard" | "compact" | "scientific" | "engineering"
         }
         visualization?: {
             preferredChartType?: "line" | "bar" | "area" | "pie" | "gauge" | "number"
             xAxisType?: "time" | "category"
-            icon?: string                   // Icon identifier
+            icon?: string
         }
     }
     metadata?: Record<string, any>
 }
 
 export type StatisticResult = {
-    value: any                          // The calculated value (number, string, object)
+    value: any
     metadata?: Record<string, any>;
 }
 
-// Query parameters
+
 export type PaginationParams = {
     offset?: number
     limit?: number
@@ -266,7 +266,7 @@ export type AlertQueryParams = PaginationParams & {
     order?: string
 }
 
-// ===== VIEWS API =====
+
 
 export const listViews = async (params?: ViewQueryParams) => {
     const response = await sdk.client.fetch<{ views: StatisticsView[]; count: number }>("/admin/statistics/views", {
@@ -347,7 +347,7 @@ export const cloneView = async (id: string, data: {
     return response
 }
 
-// ===== OPTIONS API =====
+
 
 export const listOptions = async (params?: OptionQueryParams) => {
     const response = await sdk.client.fetch<{ options: StatisticsOption[]; count: number }>("/admin/statistics/options", {
@@ -409,7 +409,7 @@ export const updateOption = async (id: string, data: {
     return response.option
 }
 
-// ===== CHARTS API =====
+
 
 export const listCharts = async (params?: { view_id?: string; limit?: number; offset?: number }) => {
     const response = await sdk.client.fetch<{ charts: StatisticsChart[]; count: number }>("/admin/statistics/charts", {
@@ -483,7 +483,7 @@ export const removeStatisticFromChart = async (chartId: string, statisticId: str
     return response.chart
 }
 
-// ===== PROVIDERS API =====
+
 
 export const listProviders = async (params?: {
     is_enabled?: boolean
@@ -522,7 +522,7 @@ export const getAllProviderStatistics = async (params?: { provider_id?: string; 
     return response
 }
 
-// ===== ALERTS API =====
+
 
 export const listAlerts = async (params?: AlertQueryParams) => {
     const response = await sdk.client.fetch<{ alerts: StatisticsAlert[]; count: number }>("/admin/statistics/alerts", {
@@ -595,7 +595,7 @@ export const toggleAlert = async (id: string, is_enabled: boolean): Promise<Stat
     return response.alert
 }
 
-// ===== ALERT LOGS API =====
+
 
 export type AlertLogQueryParams = PaginationParams & {
     alert_id?: string
@@ -619,9 +619,9 @@ export const getAlertLog = async (id: string) => {
     return response.log
 }
 
-// ============================================================================
-// Composite Statistics API Functions
-// ============================================================================
+
+
+
 
 /**
  * Clone a statistics option with customizations

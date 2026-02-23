@@ -68,7 +68,7 @@ export const dedupeAlertsStep = createStep(
                 evaluationData,
             });
 
-            // De-duplication: skip if exact alert evaluation has already been logged
+
             try {
                 const existingLogs = await statisticsService.listStatisticsAlertLogs(
                     {

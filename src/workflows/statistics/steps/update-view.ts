@@ -30,7 +30,7 @@ export const updateViewStep = createStep(
 
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Revert changes (in real scenario, we'd need to fetch original data first)
+
         await statisticsService.updateStatisticsViews([compensationData.previousData]);
     }
 );

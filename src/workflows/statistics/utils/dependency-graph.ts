@@ -9,7 +9,7 @@ export interface DependencyNode {
     id: string;
     name: string;
     provider_option_name: string;
-    parameter_name?: string; // For input dependencies
+    parameter_name?: string;
     dependencies: DependencyNode[];
     depth: number;
 }
@@ -18,7 +18,7 @@ export interface DependencyNode {
  * Result of dependency resolution
  */
 export interface DependencyResolution {
-    calculationOrder: string[]; // Option IDs in topological sort order
+    calculationOrder: string[];
     dependencyTree: DependencyNode;
     hasCycles: boolean;
     cycleNodes?: string[];
@@ -118,12 +118,12 @@ export class DependencyGraphUtils {
                 return;
             }
 
-            // Visit all dependencies first (depth-first)
+
             for (const dep of node.dependencies) {
                 visit(dep);
             }
 
-            // Then add this node
+
             visited.add(node.id);
             order.push(node.id);
         };
@@ -152,7 +152,7 @@ export class DependencyGraphUtils {
                     return [optionId, ...cycle];
                 }
             } else if (recursionStack.has(depId)) {
-                // Cycle detected
+
                 return [optionId, depId];
             }
         }
@@ -172,7 +172,7 @@ export class DependencyGraphUtils {
         const errors: string[] = [];
 
         try {
-            // Try to build the tree - will throw if circular dependency
+
             await this.buildDependencyTree(optionId, statisticsService);
         } catch (error: any) {
             if (error.message.includes("Circular dependency")) {

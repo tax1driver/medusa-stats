@@ -16,7 +16,7 @@ export const updateChartStep = createStep(
     async (input: UpdateChartInput, { container }) => {
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Convert null values to undefined for MedusaService compatibility
+
         const cleanedInput = {
             id: input.id,
             ...(input.name !== undefined && { name: input.name }),
@@ -35,7 +35,7 @@ export const updateChartStep = createStep(
 
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Convert null values to undefined for compensation as well
+
         const cleanedInput = {
             id: original.id,
             ...(original.name !== undefined && { name: original.name }),

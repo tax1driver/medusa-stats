@@ -6,7 +6,7 @@ export const validateAlertInputStep = createStep(
     async (input: any) => {
         const condition = input?.condition || {};
 
-        // Validate operator and threshold match
+
         if (input.condition.operator === "between") {
             if (!Array.isArray(condition.threshold) || condition.threshold.length !== 2) {
                 throw new MedusaError(
@@ -30,7 +30,7 @@ export const validateAlertInputStep = createStep(
             }
         }
 
-        // Validate comparison type
+
         if (!["absolute", "relative"].includes(condition.comparisonType)) {
             throw new MedusaError(
                 MedusaError.Types.INVALID_DATA,
@@ -38,7 +38,7 @@ export const validateAlertInputStep = createStep(
             );
         }
 
-        // Validate relative comparison options
+
         if (condition.comparisonType === "relative") {
             if (condition.lookbackPositions !== undefined && (!Number.isInteger(condition.lookbackPositions) || condition.lookbackPositions < 1)) {
                 throw new MedusaError(

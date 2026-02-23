@@ -61,22 +61,22 @@ const chartStyles = {
         verticalAlign: "bottom" as const,
         align: "left" as const,
     },
-    defaultColor: "var(--fg-interactive)"  // Default chart color
+    defaultColor: "var(--fg-interactive)"
 }
 
 const getTickFormatter = (intervalSeconds: number) => {
-    // Format based on interval
-    if (intervalSeconds >= 86400) { // >= 1 day
+
+    if (intervalSeconds >= 86400) {
         return (value: any) => {
             const date = new Date(value)
             return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
         }
-    } else if (intervalSeconds >= 3600) { // >= 1 hour
+    } else if (intervalSeconds >= 3600) {
         return (value: any) => {
             const date = new Date(value)
             return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
         }
-    } else { // < 1 hour
+    } else {
         return (value: any) => {
             const date = new Date(value)
             return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -105,7 +105,7 @@ const CustomTooltip = ({
         return null
     }
 
-    // Format the label based on whether it's time-based
+
     const formatLabel = (value: any) => {
         return tickFormatter ? tickFormatter(value) : String(value)
     }
@@ -152,7 +152,7 @@ function renderChartLegend(statistics: Array<StatisticsOption & { result?: any }
         return (
             <div className="flex flex-wrap gap-1 pt-2">
                 {payload.map((entry) => {
-                    // Find the statistic that matches this legend entry
+
                     const matchingStat = statistics.find(s => s.local_option_name === entry.value)
                     const parameters = matchingStat?.data || {}
                     const tooltipContent = (
@@ -214,28 +214,28 @@ export const ComboChart = ({ statistics, chartConfig, interval }: ComboChartProp
         })
 
         return Array.from(dataMap.values()).sort((a, b) => {
-            // Sort by x value - handle numbers, dates, and strings
+
             if (typeof a.x === 'number' && typeof b.x === 'number') {
                 return a.x - b.x
             }
 
             if (typeof a.x === 'string' && typeof b.x === 'string') {
-                // Only try parsing as dates if xAxisType is "time"
+
                 if (isTimeAxis) {
                     const dateA = new Date(a.x)
                     const dateB = new Date(b.x)
 
-                    // Check if both are valid dates
+
                     if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
                         return dateA.getTime() - dateB.getTime()
                     }
                 }
 
-                // Fall back to string comparison
+
                 return a.x.localeCompare(b.x)
             }
 
-            // Mixed types or other cases - convert to string for comparison
+
             return String(a.x).localeCompare(String(b.x))
         })
     }, [statistics])
@@ -294,7 +294,7 @@ export const ComboChart = ({ statistics, chartConfig, interval }: ComboChartProp
                         />
                     )}
 
-                    {/* Render each statistic as its configured chart type */}
+
                     {statistics.map((stat) => {
                         const config = stat.visualization_config as SeriesVisualizationConfig
                         if (config?.visible === false) return null

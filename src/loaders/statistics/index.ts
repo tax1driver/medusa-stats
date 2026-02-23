@@ -27,9 +27,9 @@ const registrationFn = async (klass: any, container: MedusaContainer, pluginOpti
     const key = `sp_${klass.identifier}${pluginOptions.id ? `_${pluginOptions.id}` : ""
         }`
 
-    // This is kind of a hack, since we want to be able to inject the QueryModule into the providers
-    // but we can't do that as the QueryModule is not available at the time of registration.
-    // So we register a factory that will create the provider instance with the QueryModule when it's requested.
+
+
+
     container.register({
         [key]: asValue(klass),
     });

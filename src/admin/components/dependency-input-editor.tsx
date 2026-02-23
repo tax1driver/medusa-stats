@@ -22,7 +22,7 @@ export const DependencyInputEditor = ({
     const queryClient = useQueryClient()
     const [selectorOpen, setSelectorOpen] = useState(false)
 
-    // Mutation to create option for the dependency
+
     const createOptionMutation = useMutation({
         mutationFn: async (data: {
             provider_id: string
@@ -37,7 +37,7 @@ export const DependencyInputEditor = ({
         onSuccess: (createdOption) => {
             queryClient.invalidateQueries({ queryKey: [STATISTICS_QUERY, "options"] })
 
-            // Add the new option as a dependency
+
             const newDependency: InputDependency = {
                 id: `temp-${Date.now()}`,
                 composite_option_id: excludeOptionId || "",

@@ -7,8 +7,8 @@ export interface CreateAlertInput {
     description?: string;
     option_id: string;
     condition: any;
-    period?: any; // { type: 'calendar' | 'custom', config: ... }
-    interval?: number; // Interval in seconds
+    period?: any;
+    interval?: number;
     severity: "info" | "warning" | "critical";
     is_enabled?: boolean;
     metadata?: Record<string, any>;
@@ -19,10 +19,10 @@ export const createAlertStep = createStep(
     async (input: CreateAlertInput, { container }) => {
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Set defaults for interval if not provided (period is now optional)
+
         const alertData = {
             ...input,
-            interval: input.interval || 86400, // Default: 1 day
+            interval: input.interval || 86400,
             condition: input.condition as any,
         };
 

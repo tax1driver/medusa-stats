@@ -38,7 +38,7 @@ export async function POST(
 
     const { description, severity, condition, period, interval, metadata, ...rest } = req.validatedBody;
 
-    // Map severity: error -> critical
+
     const workflowSeverity = severity === "error" ? "critical" : severity;
 
     const updateData: any = {

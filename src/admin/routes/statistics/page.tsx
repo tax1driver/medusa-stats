@@ -136,7 +136,7 @@ const ViewActions = ({ view }: { view: StatisticsView }) => {
                     Edit
                 </DropdownMenu.Item>
                 <DropdownMenu.Item onClick={() => {
-                    // TODO: Implement clone
+
                     toast.info("Coming soon", {
                         description: "Clone functionality will be available soon",
                     })
@@ -201,7 +201,7 @@ const CreateViewModal = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
         queryFn: () => getAllProviderStatistics(),
     })
 
-    // Group statistics by provider
+
     const groupedStatistics = useMemo(() => {
         if (!statisticsData?.statistics) return {}
 
@@ -310,7 +310,7 @@ const CreateViewModal = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
                 <Drawer.Body>
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="flex flex-col gap-6">
-                            {/* Basic Information */}
+
                             <div>
                                 <div className="space-y-4">
                                     <div>
@@ -397,7 +397,7 @@ const StatisticsDashboardPage = () => {
         placeholderData: keepPreviousData,
     })
 
-    // Create skeleton data for loading state
+
     const skeletonData = useMemo(() => {
         return Array.from({ length: 5 }, (_, i) => ({
             id: `skeleton-${i}`,

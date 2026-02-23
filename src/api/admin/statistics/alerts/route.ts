@@ -84,10 +84,10 @@ export async function POST(
 ) {
     const { description, condition, severity, user_ids, period, interval, metadata, ...rest } = req.validatedBody;
 
-    // Map severity: error -> critical
+
     const workflowSeverity = severity === "error" ? "critical" as const : severity;
 
-    // Normalize condition to ensure proper typing
+
     const normalizedCondition: {
         operator: "lt" | "gt" | "lte" | "gte" | "eq" | "neq" | "between";
         comparisonType: "absolute" | "relative";
@@ -106,14 +106,14 @@ export async function POST(
             ...rest,
             description: description || undefined,
             condition: normalizedCondition,
-            period, // Optional: auto-calculated if not provided
+            period,
             interval,
             severity: workflowSeverity,
             metadata,
         }
     });
 
-    // Link alert to users if provided
+
     if (user_ids && user_ids.length > 0) {
         const link = req.scope.resolve(ContainerRegistrationKeys.LINK);
 

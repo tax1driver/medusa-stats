@@ -1,6 +1,6 @@
 {
   "name": "medusa-stats",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "The most flexible statistics plugin for the most flexible commerce platform.",
   "author": "Maciej (https://github.com/tax1driver)",
   "license": "MIT",
@@ -61,13 +61,13 @@
     "jest": "^30.2.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
+    "react-colorful": "^5.6.1",
     "react-dom": "^18.2.0",
     "recharts": "^3.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
     "vite": "^5.2.11",
-    "yalc": "^1.0.0-pre.53",
-    "react-colorful": "^5.6.1"
+    "yalc": "^1.0.0-pre.53"
   },
   "peerDependencies": {
     "@medusajs/admin-sdk": "^2.12.4",

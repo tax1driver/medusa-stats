@@ -52,7 +52,7 @@ export const calculateStatisticsStep = createStep(
         const errors: Record<string, string> = {};
         const metadata: Record<string, { fromCache: boolean; cachedAt?: string; calculationTime: number }> = {};
 
-        // Local cache for available statistics by provider ID
+
         const providerStatsMap = new Map<string, any[]>();
 
         for (const optionInput of inputOptions || []) {
@@ -65,7 +65,7 @@ export const calculateStatisticsStep = createStep(
             try {
                 const statStartTime = Date.now();
 
-                // Retrieve full option to detect and process composite dependencies
+
                 const fullOption = await statisticsService.retrieveStatisticsOption(optionId, {
                     relations: ["provider", "input_dependencies"],
                 });
@@ -104,7 +104,7 @@ export const calculateStatisticsStep = createStep(
 
                         const providerInstance = statisticsService.getProvider(depOption.provider.id, query);
 
-                        // Check cache for available statistics
+
                         let availableStats = providerStatsMap.get(depOption.provider.id);
                         if (!availableStats) {
                             availableStats = await providerInstance.getAvailableStatistics();
@@ -249,10 +249,10 @@ export const calculateStatisticsStep = createStep(
                     );
                 }
 
-                // Get provider instance with QueryModule
+
                 const providerInstance = statisticsService.getProvider(fullOption.provider.id, query);
 
-                // Check cache for available statistics
+
                 let availableStats = providerStatsMap.get(fullOption.provider.id);
                 if (!availableStats) {
                     availableStats = await providerInstance.getAvailableStatistics();
@@ -268,7 +268,7 @@ export const calculateStatisticsStep = createStep(
                     );
                 }
 
-                // Merge parameters: option.data + sharedStatsData
+
                 const mergedParameters = mergeParameters(
                     fullOption.data || {},
                     sharedStatsData || {},
@@ -278,13 +278,13 @@ export const calculateStatisticsStep = createStep(
                     fullOption.provider.id
                 );
 
-                // Validate parameters
+
                 const validatedParameters = validateParameters(
                     mergedParameters,
                     statDefinition.parameters.fields
                 );
 
-                // Check if caching is enabled for this option
+
                 const cachingEnabled = isCachingEnabled(
                     fullOption.cache_options as any,
                     sharedCacheOptions as any
@@ -294,7 +294,7 @@ export const calculateStatisticsStep = createStep(
                 let cacheKey: string | null = null;
 
                 if (cachingEnabled) {
-                    // Generate cache key for this specific option with its state
+
                     cacheKey = await generateStatisticCacheKey(cacheService, {
                         option_id: fullOption.id,
                         periodStart,
@@ -303,7 +303,7 @@ export const calculateStatisticsStep = createStep(
                         parameters: validatedParameters
                     });
 
-                    // Check cache for this option
+
                     cachedResult = await cacheService.get({
                         key: cacheKey
                     });
@@ -319,7 +319,7 @@ export const calculateStatisticsStep = createStep(
                     }
                 }
 
-                // Calculate
+
                 const result = await providerInstance.calculateStatistic({
                     id: fullOption.provider_option_name,
                     parameters: validatedParameters,
@@ -331,13 +331,13 @@ export const calculateStatisticsStep = createStep(
 
                 const statCalculationTime = Date.now() - statStartTime;
 
-                // Store metadata
+
                 metadata[fullOption.id] = {
                     fromCache: false,
                     calculationTime: statCalculationTime
                 };
 
-                // Store individual option result in cache with effective TTL if caching is enabled
+
                 if (cachingEnabled && cacheKey) {
                     const effectiveTTL = getEffectiveCacheTTL(
                         fullOption.cache_options as any,
@@ -362,7 +362,7 @@ export const calculateStatisticsStep = createStep(
             }
         }
 
-        const totalDuration = (Date.now() - operationStartTime) / 1000; // in seconds
+        const totalDuration = (Date.now() - operationStartTime) / 1000;
 
         return new StepResponse({
             results,

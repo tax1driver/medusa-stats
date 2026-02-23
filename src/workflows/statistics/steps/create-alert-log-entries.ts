@@ -44,7 +44,7 @@ export const createAlertLogEntriesStep = createStep(
                     condition: alert.condition,
                 };
 
-                // Create log entry - event has been emitted, subscriber will handle notification
+
                 const log = await statisticsService.createStatisticsAlertLogs({
                     alert_id: alert.id,
                     triggered_at: new Date(),
@@ -65,7 +65,7 @@ export const createAlertLogEntriesStep = createStep(
         return new StepResponse(createdLogs);
     },
     async (createdLogs: any[] | undefined, { container }) => {
-        // Compensation: delete created logs if workflow fails
+
         if (!createdLogs || createdLogs.length === 0) {
             return;
         }

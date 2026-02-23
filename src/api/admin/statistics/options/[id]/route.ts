@@ -43,7 +43,7 @@ export async function POST(
         id: req.params.id,
     };
 
-    // Standard fields
+
     if (req.validatedBody.data !== undefined) {
         updateData.data = req.validatedBody.data;
     }
@@ -57,7 +57,7 @@ export async function POST(
         updateData.cache_options = req.validatedBody.cache_options;
     }
 
-    // Composite Statistics fields
+
     if (req.validatedBody.parameter_config !== undefined) {
         updateData.parameter_config = req.validatedBody.parameter_config;
     }
@@ -86,10 +86,10 @@ export async function DELETE(
 ) {
     const statisticsService = req.scope.resolve<StatisticsService>(STATISTICS_MODULE);
 
-    // Validate deletion (throws if option is used as dependency)
+
     await statisticsService.validateOptionDeletion(req.params.id);
 
-    // Proceed with deletion
+
     await statisticsService.deleteStatisticsOptions(req.params.id);
 
     res.json({ id: req.params.id, deleted: true });

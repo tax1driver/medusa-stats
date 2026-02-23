@@ -9,9 +9,9 @@ export interface CreateAlertInput {
     condition: {
         operator: "lt" | "gt" | "lte" | "gte" | "eq" | "neq" | "between";
         comparisonType: "absolute" | "relative";
-        threshold?: number | [number, number]; // For absolute or between
-        lookbackPositions?: number; // For relative
-        changeType?: "absolute" | "percentage"; // For relative percentage comparisons
+        threshold?: number | [number, number];
+        lookbackPositions?: number;
+        changeType?: "absolute" | "percentage";
     };
     period?: {
         type: "calendar" | "custom";
@@ -19,7 +19,7 @@ export interface CreateAlertInput {
         | { reference: "today" | "yesterday" | "wtd" | "lastweek" | "mtd" | "lastmonth" | "qtd" | "lastquarter" | "ytd" | "lastyear" }
         | { start: string | Date; end: string | Date };
     };
-    interval?: number; // Interval in seconds
+    interval?: number;
     severity: "info" | "warning" | "critical";
     is_enabled?: boolean;
     metadata?: {
@@ -33,10 +33,10 @@ export interface CreateAlertInput {
 export const createAlertWorkflow = createWorkflow(
     "create-alert",
     (input: CreateAlertInput) => {
-        // Step 1: Validate alert input
+
         const validated = validateAlertInputStep(input);
 
-        // Step 2: Create alert
+
         const alert = createAlertStep(validated);
 
         return new WorkflowResponse(alert);

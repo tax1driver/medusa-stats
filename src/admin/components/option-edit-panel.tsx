@@ -30,7 +30,7 @@ const PRESET_SERIES_COLORS = [
     "hsl(240, 70%, 60%)",
 ]
 
-// Stat Parameter Input Component - Maps dependencies to parameters
+
 const StatParameterInput = ({
     field,
     value,
@@ -77,7 +77,7 @@ const StatParameterInput = ({
     )
 }
 
-// Parameter Input Component
+
 const ParameterInput = ({
     field,
     value,
@@ -146,7 +146,7 @@ const ParameterInput = ({
         )
     }
 
-    // Default text input
+
     return (
         <div>
             <Label htmlFor={field.name}>{field.label}</Label>
@@ -212,7 +212,7 @@ export const OptionEditPanel = ({
 }: OptionEditPanelProps) => {
     const [showCustomColorPicker, setShowCustomColorPicker] = useState(false)
 
-    // Fetch provider statistics to get field definitions
+
     const { data: providerStats, isLoading: isLoadingFields } = useQuery({
         queryKey: [STATISTICS_QUERY, "providers", option.provider_id || option.provider?.id, "statistics"],
         queryFn: () => getProviderStatistics(option.provider_id || option.provider!.id),
@@ -237,7 +237,7 @@ export const OptionEditPanel = ({
 
     return (
         <div className="space-y-6">
-            {/* Context Indicator */}
+
             {context === "dependency" && (
                 <div className="bg-ui-bg-subtle border border-ui-border-base rounded-lg p-3">
                     <Text size="xsmall" className="text-ui-fg-subtle">
@@ -246,7 +246,7 @@ export const OptionEditPanel = ({
                 </div>
             )}
 
-            {/* Display Name */}
+
             <div>
                 <Label htmlFor="option_name">Display Name</Label>
                 <Input
@@ -264,7 +264,7 @@ export const OptionEditPanel = ({
                 </Text>
             </div>
 
-            {/* Parameters */}
+
             <div className="border-t border-ui-border-base pt-6">
                 <div className="mb-4">
                     <Heading level="h3" className="text-sm">Parameters</Heading>
@@ -298,9 +298,9 @@ export const OptionEditPanel = ({
                         ) : (
                             <div className="space-y-4">
                                 {statisticDef.parameters.fields.map((field: ParameterFieldDefinition) => {
-                                    // Special handling for stat parameter type
+
                                     if (field.fieldType === "stat") {
-                                        // Find the dependency mapped to this parameter
+
                                         const mappedDep = editedDependencies.find(dep => dep.parameter_name === field.name)
                                         const currentValue = mappedDep?.input_option_id || ""
 
@@ -310,14 +310,14 @@ export const OptionEditPanel = ({
                                                 field={field}
                                                 value={currentValue}
                                                 onChange={(selectedOptionId) => {
-                                                    // Update the dependency's parameter_name
+
                                                     if (onDependenciesChange) {
                                                         const updatedDependencies = editedDependencies.map(dep => {
-                                                            // Clear previous mapping for this field
+
                                                             if (dep.parameter_name === field.name) {
                                                                 return { ...dep, parameter_name: null }
                                                             }
-                                                            // Set new mapping
+
                                                             if (dep.input_option_id === selectedOptionId) {
                                                                 return { ...dep, parameter_name: field.name }
                                                             }
@@ -331,7 +331,7 @@ export const OptionEditPanel = ({
                                         )
                                     }
 
-                                    // Regular parameter handling
+
                                     return (
                                         <ParameterInput
                                             key={field.name}
@@ -352,7 +352,7 @@ export const OptionEditPanel = ({
                 )}
             </div>
 
-            {/* Dependencies Section */}
+
             {showDependenciesSection && onDependenciesChange && hasStatParameters && (
                 <div className="border-t border-ui-border-base pt-6">
                     <div className="mb-4">
@@ -371,7 +371,7 @@ export const OptionEditPanel = ({
                 </div>
             )}
 
-            {/* Visualization Options */}
+
             {showVisualizationOptions && onVisualizationChange && (
                 <div className="border-t border-ui-border-base pt-6">
                     <div className="mb-4">
@@ -501,7 +501,7 @@ export const OptionEditPanel = ({
                 </div>
             )}
 
-            {/* Cache Options */}
+
             {showCacheOptions && onCacheOptionsChange && (
                 <div className="border-t border-ui-border-base pt-6">
                     <div className="mb-4">
@@ -512,7 +512,7 @@ export const OptionEditPanel = ({
                     </div>
 
                     <div className="space-y-4">
-                        {/* Override Checkbox */}
+
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label>Override Cache Settings</Label>
@@ -524,17 +524,17 @@ export const OptionEditPanel = ({
                                 checked={editedCacheOptions !== null}
                                 onCheckedChange={(checked) => {
                                     if (checked) {
-                                        // Enable override with default settings
+
                                         onCacheOptionsChange({ enabled: true, ttl: 3600 })
                                     } else {
-                                        // Disable override - use view settings
+
                                         onCacheOptionsChange(null)
                                     }
                                 }}
                             />
                         </div>
 
-                        {/* Show cache options only when override is enabled */}
+
                         {editedCacheOptions !== null && (
                             <>
                                 <div className="flex items-center justify-between pl-4 border-l-2 border-ui-border-base">

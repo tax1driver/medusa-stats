@@ -113,7 +113,7 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
         form.setValue("provider_id", providerId)
         form.setValue("statistic_id", statistic.id)
 
-        // Initialize parameters with defaults
+
         const defaultParams: Record<string, any> = {}
         if (statistic.parameters?.fields) {
             statistic.parameters.fields.forEach((field: ParameterFieldDefinition) => {
@@ -195,7 +195,7 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
                                         </Table.Row>
                                         {isExpanded && (
                                             <Table.Row className="bg-ui-bg-subtle hover:bg-ui-bg-subtle">
-                                                {/* @ts-expect-error - colSpan is not typed but works */}
+
                                                 <Table.Cell colSpan={4}>
                                                     <div className="space-y-2 py-4">
                                                         <h4 className="text-sm font-medium mb-3">
@@ -371,7 +371,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
             comparison_type: "absolute",
             change_type: "absolute",
             lookback_positions: 1,
-            interval: 86400, // 1 day in seconds
+            interval: 86400,
             is_enabled: true,
         },
     })
@@ -463,18 +463,18 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
         form.setValue("interval", intervalToSeconds(intervalValue, intervalUnit))
     }, [intervalValue, intervalUnit, form])
 
-    // Handle operator changes to convert threshold type
+
     const operator = form.watch("operator")
     useEffect(() => {
         const currentThreshold = form.getValues("threshold")
 
         if (operator === "between") {
-            // Convert to array if not already
+
             if (!Array.isArray(currentThreshold)) {
                 form.setValue("threshold", [0, currentThreshold || 0] as [number, number])
             }
         } else {
-            // Convert to single number if it's an array
+
             if (Array.isArray(currentThreshold)) {
                 form.setValue("threshold", currentThreshold[0] || 0)
             }
@@ -578,7 +578,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
             case "statistic":
                 return selectionMode === "presets" ? !!presetOptionIdWatch : !!statisticIdWatch
             case "parameters":
-                return true // Always allow proceeding from parameters
+                return true
             case "condition":
                 return true
             default:

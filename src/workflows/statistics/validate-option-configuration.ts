@@ -10,13 +10,13 @@ export interface ValidateOptionConfigurationInput {
 export const validateOptionConfigurationWorkflow = createWorkflow(
     "validate-option-configuration",
     (input: ValidateOptionConfigurationInput) => {
-        // Step 1: Fetch option with relations
+
         const option = fetchOptionWithRelationsStep({ option_id: input.option_id });
 
-        // Step 2: Fetch available statistics
+
         const availableStatistics = fetchAvailableStatisticsStep({});
 
-        // Step 3: Validate configuration using consolidated step
+
         const validation = validateOptionParametersStep({
             options: [
                 {

@@ -95,15 +95,15 @@ export async function POST(
         data: data || {},
     };
 
-    // Handle input_dependencies if provided
+
     if (input_dependencies && input_dependencies.length > 0) {
         createData.input_dependencies = input_dependencies;
     }
 
     const option = await statisticsService.createStatisticsOptions(createData);
 
-    // Link option to current user if authenticated
-    // Note: auth_context should be available through middleware
+
+
     const actorId = (req as any).auth_context?.actor_id;
     if (actorId) {
         const link = req.scope.resolve(ContainerRegistrationKeys.LINK);

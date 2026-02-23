@@ -12,13 +12,13 @@ export type ParameterFieldType =
     | "daterange"
     | "currency"
     | "json"
-    | "entity"      // Single entity reference
-    | "entities"    // Multiple entity references
+    | "entity"
+    | "entities"
     | "custom"
     | "stat";
 
 export interface EntityReference {
-    entity: string;  // Entity type (e.g., "customer", "product", "sales_channel")
+    entity: string;
 }
 
 export interface ParameterFieldDefinition {
@@ -27,12 +27,12 @@ export interface ParameterFieldDefinition {
     description?: string;
     placeholder?: string;
 
-    // Zod schema for this specific field
+
     schema?: z.ZodType<any>;
 
     fieldType: ParameterFieldType;
 
-    // For select/multiselect fields
+
     options?: Array<{
         value: string | number | boolean;
         label: string;
@@ -40,10 +40,10 @@ export interface ParameterFieldDefinition {
         disabled?: boolean;
     }> | ((context: Record<string, any>) => Promise<Array<any>> | Array<any>);
 
-    // For entity reference fields
+
     entityReference?: EntityReference;
 
-    // Relations and dependencies
+
     dependsOn?: Array<{
         field: string;
         condition: (value: any, allValues: Record<string, any>) => boolean;
@@ -61,9 +61,9 @@ export interface AvailableStatistic {
         defaults?: Record<string, any>;
     };
 
-    // Display configuration for this statistic type
+
     display: {
-        // Visual representation hints
+
         visualization?: {
             preferredChartType?: "line" | "bar" | "area" | "pie" | "gauge" | "number" | string;
             xAxisType?: "time" | "category";
@@ -75,13 +75,13 @@ export interface AvailableStatistic {
 }
 
 export interface CalculateStatisticInput {
-    id: string;                          // The statistic type to calculate
-    parameters: Record<string, any>;     // Validated and merged parameter values
-    fields: ParameterFieldDefinition[];  // Field definitions for reference
-    periodStart: Date;                   // Start of calculation period
-    periodEnd: Date;                     // End of calculation period
-    interval: number;                    // Interval in seconds (3600 = hourly, 86400 = daily, 604800 = weekly)
-    metadata?: Record<string, any>;      // Additional calculation metadata
+    id: string;
+    parameters: Record<string, any>;
+    fields: ParameterFieldDefinition[];
+    periodStart: Date;
+    periodEnd: Date;
+    interval: number;
+    metadata?: Record<string, any>;
 }
 
 export type TimeSeries = Array<{ x: Date; value: any }>;
@@ -91,7 +91,7 @@ export type GaugeValue = { value: number };
 export interface StatisticResult {
     value: TimeSeries | CategoricalSeries | GaugeValue | any;
 
-    // Data quality and calculation metadata
+
     metadata?: Record<string, any>;
 }
 
@@ -195,7 +195,7 @@ export class StatBuilder {
      * Build and return the final AvailableStatistic object
      */
     build(): AvailableStatistic {
-        // Validate required fields
+
         if (!this.statistic.id || !this.statistic.name) {
             throw new Error("AvailableStatistic requires 'id' and 'name'");
         }
@@ -213,11 +213,11 @@ export class StatBuilder {
  * @returns Map of grouped data
  * 
  * @example
- * // Group by property
+ * 
  * const byDate = groupBy(orders, 'created_at')
  * 
  * @example
- * // Group by function with aggregation
+ * 
  * const revenueByDay = groupBy(
  *   orders,
  *   (order) => order.created_at.toISOString().split('T')[0],
@@ -231,7 +231,7 @@ export function groupBy<T, K extends string | number = string>(
 ): Map<K, any> {
     const groups = new Map<K, T[]>();
 
-    // Group items by key
+
     for (const item of data) {
         const key = typeof keySelector === 'function'
             ? keySelector(item)
@@ -243,7 +243,7 @@ export function groupBy<T, K extends string | number = string>(
         groups.get(key)!.push(item);
     }
 
-    // Apply aggregator if provided
+
     if (aggregator) {
         const result = new Map<K, any>();
         for (const [key, items] of groups.entries()) {
@@ -267,7 +267,7 @@ export function groupBy<T, K extends string | number = string>(
  * const intervals = generateIntervals(
  *   new Date('2024-01-01'),
  *   new Date('2024-01-31'),
- *   604800 // weekly (7 * 24 * 60 * 60)
+ *   604800 
  * )
  */
 export function generateIntervals(
@@ -300,7 +300,7 @@ export function generateIntervals(
  * const bucketDate = getIntervalBucket(
  *   new Date('2024-01-05'),
  *   new Date('2024-01-01'),
- *   604800 // weekly - returns 2024-01-01
+ *   604800 
  * )
  */
 export function getIntervalBucket(
@@ -347,12 +347,12 @@ export function createTimeSeries<T extends Record<string, any>>(
         getTimestamp = (item: T) => new Date(item[field]).getTime();
     }
 
-    // Sort data once by timestamp
+
     const sorted = [...data]
         .map(item => ({ item, timestamp: getTimestamp(item) }))
         .sort((a, b) => a.timestamp - b.timestamp);
 
-    // Generate intervals and process data in a single pass
+
     const result: Array<{ x: Date; value: number }> = [];
     const startMs = periodStart.getTime();
     const endMs = periodEnd.getTime();
@@ -452,7 +452,7 @@ export abstract class AbstractStatisticsProvider {
     protected query: any;
 
     constructor(protected readonly container: any) {
-        // Providers use cradle - access via property instead of .resolve()
+
         this.query = container[ContainerRegistrationKeys.QUERY];
     }
 

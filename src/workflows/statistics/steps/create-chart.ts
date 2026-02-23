@@ -19,7 +19,7 @@ export const createChartStep = createStep(
 
         const chart = await statisticsService.createStatisticsCharts(input);
 
-        // Link statistics to chart if provided
+
         if (input.statistic_ids && input.statistic_ids.length > 0) {
             await statisticsService.addStatisticsToChart(chart.id, input.statistic_ids);
         }

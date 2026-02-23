@@ -130,7 +130,7 @@ const AlertLogsPage = () => {
     const [search, setSearch] = useState<string>("")
     const [sorting, setSorting] = useState<DataTableSortingState | null>({ id: "triggered_at", desc: true });
     const [filtering, setFiltering] = useState<DataTableFilteringState>(() => {
-        // Initialize with URL parameter if present
+
         return alertIdFromUrl ? { alert_id: alertIdFromUrl } : {}
     })
 
@@ -153,7 +153,7 @@ const AlertLogsPage = () => {
         return value === undefined ? undefined : value as "info" | "warning" | "critical"
     }, [filtering])
 
-    // Fetch alerts list for filter dropdown
+
     const { data: alertsData } = useQuery({
         queryFn: () => listAlerts({ limit: 100 }),
         queryKey: [STATISTICS_QUERY, "alerts", "filter-list"],

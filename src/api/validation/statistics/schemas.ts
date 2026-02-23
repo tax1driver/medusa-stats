@@ -101,7 +101,7 @@ export const CloneViewSchema = z.object({
  * Option Validation Schemas
  */
 
-// Composite Statistics: Input dependency schema
+
 export const InputDependencySchema = z.object({
     input_option_id: z.string().min(1, "Input option ID is required"),
     parameter_name: z.string().min(1, "Parameter name is required").nullable(),
@@ -109,10 +109,10 @@ export const InputDependencySchema = z.object({
     metadata: z.record(z.any()).optional().nullable(),
 });
 
-// Composite Statistics: Parameter configuration schema
+
 export const ParameterConfigSchema = z.record(
     z.object({
-        value: z.any(), // Required
+        value: z.any(),
         locked: z.boolean().default(false),
     })
 );
@@ -122,7 +122,7 @@ export const ListOptionsQuerySchema = PaginationSchema.extend({
     provider_id: z.string().optional(),
     q: z.string().optional(),
     order: z.string().optional(),
-    // Composite Statistics: Additional filters
+
     preset: z.preprocess(
         (val) => {
             if (val === "true") return true;
@@ -147,7 +147,7 @@ export const CreateOptionSchema = z.object({
     provider_option_name: z.string().min(1, "Provider option name is required"),
     data: z.record(z.any()).optional().nullable(),
     local_option_name: z.string().optional(),
-    // Composite Statistics: New fields
+
     parameter_config: ParameterConfigSchema.optional().nullable(),
     preset: z.boolean().optional().default(false),
     input_dependencies: z.array(InputDependencySchema).optional(),
@@ -161,14 +161,14 @@ export const UpdateOptionSchema = z.object({
         enabled: z.boolean().optional(),
         ttl: z.number().optional(),
     }).optional().nullable(),
-    // Composite Statistics: New fields
+
     parameter_config: ParameterConfigSchema.optional().nullable(),
     preset: z.boolean().optional(),
     input_dependencies: z.array(InputDependencySchema).optional(),
     view_id: z.string().optional(),
 });
 
-// Composite Statistics: Clone option schema
+
 export const CloneOptionSchema = z.object({
     local_option_name: z.string().optional(),
     parameter_config: ParameterConfigSchema.optional().nullable(),
@@ -220,9 +220,9 @@ export const CreateAlertSchema = z.object({
     condition: z.object({
         operator: z.enum(["lt", "gt", "lte", "gte", "eq", "neq", "between"]),
         comparisonType: z.enum(["absolute", "relative"]),
-        threshold: z.union([z.number(), z.array(z.number()).length(2)]).optional(), // For absolute or between
-        lookbackPositions: z.number().positive().int().optional(), // For relative
-        changeType: z.enum(["absolute", "percentage"]).optional() // For relative percentage comparisons
+        threshold: z.union([z.number(), z.array(z.number()).length(2)]).optional(),
+        lookbackPositions: z.number().positive().int().optional(),
+        changeType: z.enum(["absolute", "percentage"]).optional()
     }),
     period: z.object({
         type: z.enum(["calendar", "custom"]),
@@ -236,7 +236,7 @@ export const CreateAlertSchema = z.object({
             })
         ])
     }).optional(),
-    interval: z.number().positive().optional(), // Interval in seconds
+    interval: z.number().positive().optional(),
     severity: z.enum(["info", "warning", "error"]),
     is_enabled: z.boolean().optional(),
     user_ids: z.array(z.string()).optional(),
@@ -265,7 +265,7 @@ export const UpdateAlertSchema = z.object({
             })
         ])
     }).optional(),
-    interval: z.number().positive().optional(), // Interval in seconds
+    interval: z.number().positive().optional(),
     severity: z.enum(["info", "warning", "error"]).optional(),
     is_enabled: z.boolean().optional(),
     metadata: z.record(z.any()).optional(),
@@ -294,26 +294,26 @@ export const GetAlertLogQuerySchema = ExpandSchema;
  */
 
 export const InvalidateCacheSchema = z.object({
-    // Target identification
+
     view_id: z.string().optional(),
     option_id: z.string().optional(),
 
-    // Options array for view-level invalidation
+
     options: z.array(z.object({
         option_id: z.string(),
         parameters: z.record(z.any())
     })).optional(),
 
-    // State parameters (required for invalidation)
+
     periodStart: z.coerce.date(),
     periodEnd: z.coerce.date(),
     interval: z.number().int().positive(),
 
-    // Parameters for option-level invalidation
+
     parameters: z.record(z.any()).optional(),
 }).refine(
     (data) => {
-        // Must provide either option_id with parameters, or view_id with options
+
         const hasOptionTarget = data.option_id && data.parameters;
         const hasViewTarget = data.view_id && data.options;
         return hasOptionTarget || hasViewTarget;
@@ -323,7 +323,7 @@ export const InvalidateCacheSchema = z.object({
     }
 );
 
-// Type exports
+
 export type ListProvidersQuery = z.infer<typeof ListProvidersQuerySchema>;
 export type GetProviderQuery = z.infer<typeof GetProviderQuerySchema>;
 export type GetProviderStatisticsQuery = z.infer<typeof GetProviderStatisticsQuerySchema>;

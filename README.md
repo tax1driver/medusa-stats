@@ -37,21 +37,23 @@ yarn add medusa-stats
 
 ## Configuration
 
-Add the module to your `medusa-config.ts`:
+Add the plugin to your `medusa-config.ts`:
 
 ```ts
 modules: [
-  // ... other modules ...
   {
-    resolve: "medusa-stats",
+    resolve: "medusa-stats/modules/statistics",
     options: {
       providers: [
         {
-          resolve: "medusa-stats/providers/statistics/common",
+          resolve: "medusa-stats/providers/common",
         },
       ],
     },
   },
+],
+plugins: [
+  `medusa-stats`
 ]
 ```
 

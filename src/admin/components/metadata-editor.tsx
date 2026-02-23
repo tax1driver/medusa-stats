@@ -15,7 +15,7 @@ type MetadataEditorProps = {
 export const MetadataEditor = ({ value, onChange }: MetadataEditorProps) => {
   const [entries, setEntries] = useState<MetadataEntry[]>([])
 
-  // Initialize entries from value
+
   useEffect(() => {
     if (value && typeof value === "object") {
       const entriesFromValue = Object.entries(value).map(([key, val]) => ({
@@ -28,7 +28,7 @@ export const MetadataEditor = ({ value, onChange }: MetadataEditorProps) => {
     }
   }, [value])
 
-  // Update parent when entries change
+
   const updateParent = (newEntries: MetadataEntry[]) => {
     const filtered = newEntries.filter(e => e.key.trim() !== "")
     if (filtered.length === 0) {
@@ -37,7 +37,7 @@ export const MetadataEditor = ({ value, onChange }: MetadataEditorProps) => {
       const obj: Record<string, any> = {}
       filtered.forEach(entry => {
         try {
-          // Try to parse as JSON, otherwise keep as string
+
           obj[entry.key] = JSON.parse(entry.value)
         } catch {
           obj[entry.key] = entry.value
@@ -77,7 +77,7 @@ export const MetadataEditor = ({ value, onChange }: MetadataEditorProps) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-ui-bg-base shadow-elevation-card-rest grid grid-cols-1 divide-y rounded-lg">
-        {/* Header */}
+
         <div className="bg-ui-bg-subtle grid grid-cols-2 divide-x rounded-t-lg">
           <div className="txt-compact-small-plus text-ui-fg-subtle px-2 py-1.5">
             <label id="metadata-form-key-label">Key</label>
@@ -87,7 +87,7 @@ export const MetadataEditor = ({ value, onChange }: MetadataEditorProps) => {
           </div>
         </div>
 
-        {/* Rows */}
+
         {entries.map((entry, index) => (
           <div key={index} className="group/table relative">
             <div className="grid grid-cols-2 divide-x overflow-hidden">
@@ -124,26 +124,26 @@ export const MetadataEditor = ({ value, onChange }: MetadataEditorProps) => {
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
                 <DropdownMenu.Item
-                    onClick={() => {
-                        const newEntries = [...entries]
-                        newEntries.splice(index, 0, { key: "", value: "" })
-                        setEntries(newEntries)
-                        updateParent(newEntries)
-                    }}
+                  onClick={() => {
+                    const newEntries = [...entries]
+                    newEntries.splice(index, 0, { key: "", value: "" })
+                    setEntries(newEntries)
+                    updateParent(newEntries)
+                  }}
                 >
-                    <ArrowUpMini className="mr-2" />
-                    Add row above
+                  <ArrowUpMini className="mr-2" />
+                  Add row above
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
-                    onClick={() => {
-                        const newEntries = [...entries]
-                        newEntries.splice(index + 1, 0, { key: "", value: "" })
-                        setEntries(newEntries)
-                        updateParent(newEntries)
-                    }}
+                  onClick={() => {
+                    const newEntries = [...entries]
+                    newEntries.splice(index + 1, 0, { key: "", value: "" })
+                    setEntries(newEntries)
+                    updateParent(newEntries)
+                  }}
                 >
-                    <ArrowDownMini className="mr-2" />
-                    Add row below
+                  <ArrowDownMini className="mr-2" />
+                  Add row below
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   onClick={() => handleDeleteRow(index)}

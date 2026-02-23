@@ -16,7 +16,7 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
     const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
     try {
-        // Fetch all active alerts with their options
+
         const alerts = await statisticsService.listStatisticsAlerts(
             { is_enabled: true },
             {
@@ -28,20 +28,20 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
             return;
         }
 
-        // Group alerts by option_id AND configuration (period + interval)
-        // This allows us to batch alerts with the same calculation requirements
+
+
         const alertsByConfig = new Map<string, any[]>();
         for (const alert of alerts) {
             const period = alert.period;
             const interval = alert.interval || 86400;
             const lookback = (alert.condition?.lookbackPositions || 1) as number;
 
-            // For alerts without explicit period, auto-calculate based on lookback
+
             let periodKey: string;
             if (period) {
                 periodKey = JSON.stringify(period);
             } else {
-                // Auto-calculated rolling period: (lookback + 1) * interval seconds
+
                 periodKey = `auto_${(lookback + 1) * interval}`;
             }
 
@@ -57,7 +57,7 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
         let triggeredCount = 0;
         let errorCount = 0;
 
-        // Process each configuration group
+
         for (const [configKey, configAlerts] of alertsByConfig.entries()) {
             try {
                 const firstAlert = configAlerts[0];
@@ -71,14 +71,14 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
                 let periodStart: Date, periodEnd: Date;
 
                 if (period) {
-                    // Explicit period (calendar or custom)
+
                     ({ start: periodStart, end: periodEnd } = calculateDatesFromPeriod(period));
                     if (periodEnd > lastCompletedBoundary) {
                         periodEnd = lastCompletedBoundary;
                     }
                 } else {
-                    // Auto-calculate rolling period from lookback
-                    // We need (lookback + 1) data points, so calculate that many intervals back
+
+
                     periodEnd = lastCompletedBoundary;
                     periodStart = new Date(periodEnd.getTime() - (lookback + 1) * interval * 1000);
                 }
@@ -87,7 +87,7 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
                     continue;
                 }
 
-                // Calculate the statistic
+
                 const { result: calculationResult } = await calculateStatisticsWorkflow(container).run({
                     input: {
                         options: [{ id: option_id }],
@@ -108,7 +108,7 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
                     );
                 }
 
-                // Evaluate alerts for this option
+
                 const { result: evaluationResult } = await evaluateAlertsWorkflow(container).run({
                     input: {
                         option_id,
@@ -137,9 +137,9 @@ export default async function evaluateStatisticsAlertsJob(container: MedusaConta
     }
 }
 
-// Job configuration
+
 export const config = {
     name: "evaluate-statistics-alerts",
-    // Run every 5 minutes
+
     schedule: "*/1 * * * *",
 };

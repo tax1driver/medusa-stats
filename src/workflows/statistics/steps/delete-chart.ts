@@ -11,7 +11,7 @@ export const deleteChartStep = createStep(
     async (input: DeleteChartInput, { container }) => {
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
-        // Fetch the chart before deletion for compensation
+
         const [chart] = await statisticsService.listStatisticsCharts({ id: input.id });
 
         await statisticsService.deleteStatisticsCharts(input.id);

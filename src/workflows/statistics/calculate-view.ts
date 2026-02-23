@@ -11,7 +11,7 @@ export interface CalculateViewInput {
 export const calculateViewWorkflow = createWorkflow(
     "calculate-view",
     (input: CalculateViewInput) => {
-        // Step 1: Fetch view with options
+
         const view = fetchViewWithOptionsStep({ view_id: input.view_id });
 
         const calculationContext = transform({ view }, ({ view }) => ({
@@ -20,7 +20,7 @@ export const calculateViewWorkflow = createWorkflow(
             sharedCacheOptions: (view as any).cache_options,
         }));
 
-        // Step 2: Calculate statistics
+
         const calculationResult = calculateStatisticsStep({
             options: calculationContext.options,
             sharedStatsData: calculationContext.sharedStatsData,

@@ -16,7 +16,7 @@ export const fetchAvailableStatisticsStep = createStep(
 
         const { provider_id } = input;
 
-        // Get enabled providers
+
         const providers = await statisticsService.listStatisticsProviders({
             id: provider_id,
         });
@@ -24,13 +24,13 @@ export const fetchAvailableStatisticsStep = createStep(
         const result: Record<string, any[]> = {};
 
         for (const provider of providers) {
-            // Skip if specific provider requested and doesn't match
+
             try {
-                // Get provider instance with QueryModule injected
+
                 const providerInstance = statisticsService.getProvider(provider.id, query);
                 const statistics = await providerInstance.getAvailableStatistics();
 
-                // Add provider info to each statistic
+
                 const enrichedStats = statistics.map(stat => ({
                     ...stat,
                     provider_id: provider.id,

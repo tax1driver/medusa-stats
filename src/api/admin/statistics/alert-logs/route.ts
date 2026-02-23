@@ -11,10 +11,10 @@ export async function GET(
 ) {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
-    // Extract severity filter from validated query params
+
     const { severity, alert_id } = req.validatedQuery as { severity?: string; alert_id?: string };
 
-    // Build filters for nested alert relationship
+
     const filters: any = {};
     if (alert_id) {
         filters.alert_id = alert_id;

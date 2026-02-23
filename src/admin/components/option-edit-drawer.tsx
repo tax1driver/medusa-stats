@@ -189,7 +189,7 @@ export const OptionEditDrawer = ({
 
     const renderOptionItem = (option: StatisticsOption, depth = 0) => {
         const isActive = activeTab === option.id
-        // Use edited dependencies if available, otherwise fall back to original
+
         const dependencies = editedDependencies[option.id] || option.input_dependencies || []
         const childOptions = dependencies.map((dep) =>
             optionMap.get(dep.input_option_id) || dep.input_option

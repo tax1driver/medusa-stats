@@ -47,13 +47,13 @@ export default class StatisticsService extends MedusaService({
             );
         }
 
-        // Create child container (cradle) with QueryModule
+
         const childContainer = {
             ...container,
             [ContainerRegistrationKeys.QUERY]: query,
         }
 
-        // Return provider instance (query already injected via cradle)
+
         return new ProviderClass(childContainer);
     }
 
@@ -96,9 +96,9 @@ export default class StatisticsService extends MedusaService({
         return { chart: updatedChart };
     }
 
-    // ========================================
-    // Composite Statistics Methods
-    // ========================================
+
+
+
 
     /**
      * Validate if an option can be deleted (check dependencies)
@@ -108,12 +108,12 @@ export default class StatisticsService extends MedusaService({
         const idArray = Array.isArray(ids) ? ids : [ids];
 
         for (const id of idArray) {
-            // Load option with dependent composites to check if it's used as input
+
             const option = await this.retrieveStatisticsOption(id, {
                 relations: ["dependent_composites"],
             });
 
-            // Check if this option is used as input in any composite statistics
+
             if (option.dependent_composites && option.dependent_composites.length > 0) {
                 const dependentNames = option.dependent_composites
                     .map((c: any) => c.local_option_name)
@@ -226,13 +226,13 @@ export default class StatisticsService extends MedusaService({
         const visited = new Set<string>();
 
         const buildTree = async (id: string, depth: number = 0): Promise<any> => {
-            // Prevent infinite loops from circular dependencies
+
             if (visited.has(id)) {
                 return { id, circular: true, depth };
             }
             visited.add(id);
 
-            // Load option with input dependencies
+
             const option = await this.retrieveStatisticsOption(id, {
                 relations: ["input_dependencies", "input_dependencies.input_option"],
             });
@@ -245,7 +245,7 @@ export default class StatisticsService extends MedusaService({
                 dependencies: [],
             };
 
-            // Recursively build dependency tree
+
             if (option.input_dependencies && option.input_dependencies.length > 0) {
                 for (const dep of option.input_dependencies as any[]) {
                     const inputId = dep.input_option?.id || dep.input_option_id;

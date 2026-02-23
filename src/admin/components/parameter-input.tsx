@@ -2,9 +2,9 @@ import { useState } from "react"
 import { Input, Label, Select, Switch, Text, Textarea } from "@medusajs/ui"
 import type { ParameterFieldDefinition } from "../lib/statistics/api";
 
-// Mock function to fetch entity data - will be replaced with actual implementation
+
 export const fetchEntityOptions = async (entityType: string) => {
-    // TODO: Replace with actual API calls based on entity type
+
     const mockData: Record<string, Array<{ value: string; label: string }>> = {
         customer: [
             { value: "cust_1", label: "John Doe" },
@@ -43,7 +43,7 @@ export const ParameterInput = ({
     const [entityOptions, setEntityOptions] = useState<Array<{ value: string; label: string }>>([])
     const [isLoadingEntities, setIsLoadingEntities] = useState(false)
 
-    // Load entity options for entity/entities field types
+
     useState(() => {
         if ((field.fieldType === "entity" || field.fieldType === "entities") && field.entityReference) {
             setIsLoadingEntities(true)
@@ -53,7 +53,7 @@ export const ParameterInput = ({
         }
     })
 
-    // Boolean
+
     if (field.fieldType === "boolean") {
         return (
             <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Select
+
     if (field.fieldType === "select") {
         return (
             <div>
@@ -98,7 +98,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Multiselect
+
     if (field.fieldType === "multiselect") {
         const selectedValues = Array.isArray(value) ? value : []
         return (
@@ -130,7 +130,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Entity (single)
+
     if (field.fieldType === "entity") {
         return (
             <div>
@@ -164,7 +164,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Entities (multiple)
+
     if (field.fieldType === "entities") {
         const selectedValues = Array.isArray(value) ? value : []
         return (
@@ -201,7 +201,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Number
+
     if (field.fieldType === "number") {
         return (
             <div>
@@ -222,7 +222,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Currency
+
     if (field.fieldType === "currency") {
         return (
             <div>
@@ -244,7 +244,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Date
+
     if (field.fieldType === "date") {
         const dateValue = value ? new Date(value).toISOString().split('T')[0] : ""
         return (
@@ -265,7 +265,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Date Range
+
     if (field.fieldType === "daterange") {
         const rangeValue = value || { start: "", end: "" }
         return (
@@ -300,7 +300,7 @@ export const ParameterInput = ({
         )
     }
 
-    // JSON
+
     if (field.fieldType === "json") {
         return (
             <div>
@@ -327,7 +327,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Custom - render as text with note
+
     if (field.fieldType === "custom") {
         return (
             <div>
@@ -349,7 +349,7 @@ export const ParameterInput = ({
         )
     }
 
-    // Default to text input
+
     return (
         <div>
             <Label htmlFor={field.name}>

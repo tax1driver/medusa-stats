@@ -198,7 +198,7 @@ const EditViewModal = ({ view, open, onOpenChange }: { view: any; open: boolean;
                                 </div>
 
                                 <div className="space-y-4">
-                                    {/* Override Checkbox */}
+
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <Label>Override Cache Settings</Label>
@@ -217,7 +217,7 @@ const EditViewModal = ({ view, open, onOpenChange }: { view: any; open: boolean;
                                         />
                                     </div>
 
-                                    {/* Show cache options only when override is enabled */}
+
                                     {cacheOverride && (
                                         <>
                                             <div className="flex items-center justify-between pl-4 border-l-2 border-ui-border-base">
@@ -280,7 +280,7 @@ const EditViewModal = ({ view, open, onOpenChange }: { view: any; open: boolean;
     )
 }
 
-// Create Chart Modal
+
 const CreateChartModal = ({
     viewId,
     open,
@@ -398,7 +398,7 @@ const CreateChartModal = ({
     )
 }
 
-// Edit Chart Modal
+
 const EditChartModal = ({
     chart,
     open,
@@ -427,7 +427,7 @@ const EditChartModal = ({
         },
     })
 
-    // Update local state when chart changes
+
     useEffect(() => {
         if (chart) {
             reset({
@@ -523,7 +523,7 @@ const EditChartModal = ({
     )
 }
 
-// Add Series to Chart Drawer
+
 const AddSeriesToChartDrawer = ({
     viewId,
     chartId,
@@ -542,7 +542,7 @@ const AddSeriesToChartDrawer = ({
     const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
     const [presetSearchQuery, setPresetSearchQuery] = useState("")
 
-    // Get available presets
+
     const { data: presetsData, isLoading: isPresetsLoading } = useQuery({
         queryKey: [STATISTICS_QUERY, "presets"],
         queryFn: () => listOptions({ preset: true }),
@@ -588,12 +588,12 @@ const AddSeriesToChartDrawer = ({
             provider_option_name: string
             local_option_name: string
         }) => {
-            // First create the statistic option
+
             const option = await createOption({
                 view_id: viewId,
                 ...data,
             })
-            // Then add it to the chart
+
             if (chartId) {
                 await addStatisticsToChart(chartId, [option.id])
             }
@@ -615,15 +615,15 @@ const AddSeriesToChartDrawer = ({
 
     const cloneFromPresetMutation = useMutation({
         mutationFn: async (presetId: string) => {
-            // Clone the preset to create a new option
+
             const clonedOption = await cloneOption(presetId, {})
 
-            // Update the cloned option to assign it to this view
+
             const updatedOption = await updateOption(clonedOption.id, {
                 view_id: viewId,
             })
 
-            // Then add it to the chart
+
             if (chartId) {
                 await addStatisticsToChart(chartId, [updatedOption.id])
             }
@@ -670,7 +670,7 @@ const AddSeriesToChartDrawer = ({
                         </Drawer.Description>
                     </Drawer.Header>
                     <Drawer.Body className="overflow-y-auto">
-                        {/* Tab Toggle */}
+
                         <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden mb-6">
                             <button
                                 type="button"
@@ -694,7 +694,7 @@ const AddSeriesToChartDrawer = ({
                             </button>
                         </div>
 
-                        {/* Provider Statistics Tab */}
+
                         {mode === 'statistics' && (
                             <div className="min-h-[420px]">
                                 <OptionSelector
@@ -704,7 +704,7 @@ const AddSeriesToChartDrawer = ({
                             </div>
                         )}
 
-                        {/* Presets Tab */}
+
                         {mode === 'presets' && (
                             <div className="flex min-h-[420px] flex-col gap-y-4">
                                 <div className="flex flex-col gap-y-2">
@@ -811,7 +811,7 @@ const ViewDetailPage = () => {
     const [addingToChartId, setAddingToChartId] = useState<string | null>(null)
     const [gridSize, setGridSize] = useState<'compact' | 'medium' | 'large'>('medium')
 
-    // Calculation parameters
+
     const [periodStart, setPeriodStart] = useState(() => {
         const date = new Date()
         date.setDate(date.getDate() - 30)
@@ -820,7 +820,7 @@ const ViewDetailPage = () => {
     const [periodEnd, setPeriodEnd] = useState(() => {
         return new Date().toISOString().split('T')[0]
     })
-    const [interval, setInterval] = useState<number>(86400) // 1 day in seconds
+    const [interval, setInterval] = useState<number>(86400)
     const [customIntervalCount, setCustomIntervalCount] = useState<number>(1)
     const [customIntervalUnit, setCustomIntervalUnit] = useState<'m' | 'H' | 'D' | 'W' | 'M'>('D')
     const [isCustomPeriod, setIsCustomPeriod] = useState(false)
@@ -829,7 +829,7 @@ const ViewDetailPage = () => {
     const [currentPeriodConfig, setCurrentPeriodConfig] = useState<Record<string, any>>({})
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
-    // Track saved values to compare against
+
     const [savedPeriodStart, setSavedPeriodStart] = useState<string>('')
     const [savedPeriodEnd, setSavedPeriodEnd] = useState<string>('')
     const [savedInterval, setSavedInterval] = useState<number>(86400)
@@ -880,12 +880,12 @@ const ViewDetailPage = () => {
         []
     )
 
-    // Helper to convert period preset to backend structure
+
     const presetToBackendConfig = (preset: string): { type: 'rolling' | 'calendar' | 'custom', config: Record<string, any> } => {
         return periodPresetMap[preset] || { type: 'custom', config: {} }
     }
 
-    // Helper to calculate dates from backend config
+
     const calculateDatesFromConfig = (type: string, config: Record<string, any>): { start: Date, end: Date } => {
         const now = new Date()
         let start = new Date()
@@ -974,17 +974,17 @@ const ViewDetailPage = () => {
         return { start, end }
     }
 
-    // Period preset helpers
+
     const applyPeriodPreset = (preset: string) => {
         setIsCustomPeriod(false)
 
-        // Convert preset to backend structure
+
         const { type, config } = presetToBackendConfig(preset)
 
-        // Calculate dates using the same logic as initialization
+
         const { start, end } = calculateDatesFromConfig(type, config)
 
-        // Update state
+
         setPeriodStart(start.toISOString().split('T')[0])
         setPeriodEnd(end.toISOString().split('T')[0])
         setCurrentPeriodType(type)
@@ -992,7 +992,7 @@ const ViewDetailPage = () => {
         setHasUnsavedChanges(true)
     }
 
-    // Helper to convert unit to seconds
+
     const unitToSeconds = (unit: 'm' | 'H' | 'D' | 'W' | 'M'): number => {
         switch (unit) {
             case 'm': return 60
@@ -1003,7 +1003,7 @@ const ViewDetailPage = () => {
         }
     }
 
-    // Update interval when custom values change
+
     const handleCustomIntervalChange = (count: number, unit: 'm' | 'H' | 'D' | 'W' | 'M') => {
         setCustomIntervalCount(count)
         setCustomIntervalUnit(unit)
@@ -1012,7 +1012,7 @@ const ViewDetailPage = () => {
         setHasUnsavedChanges(true)
     }
 
-    // Apply interval preset
+
     const applyIntervalPreset = (seconds: number) => {
         setIsCustomInterval(false)
         setInterval(seconds)
@@ -1025,7 +1025,7 @@ const ViewDetailPage = () => {
         enabled: !!id,
     })
 
-    // Initialize period config from view data
+
     useEffect(() => {
         if (view && view.period_type && view.period_config) {
             setCurrentPeriodType(view.period_type)
@@ -1066,7 +1066,7 @@ const ViewDetailPage = () => {
         }
     }, [view])
 
-    // Mutation to update period configuration
+
     const updatePeriodConfigMutation = useMutation({
         mutationFn: (data: {
             period_type: 'rolling' | 'calendar' | 'custom'
@@ -1089,7 +1089,7 @@ const ViewDetailPage = () => {
         },
     })
 
-    // Warn user about unsaved changes before leaving
+
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasUnsavedChanges) {
@@ -1102,7 +1102,7 @@ const ViewDetailPage = () => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload)
     }, [hasUnsavedChanges])
 
-    // Save period configuration
+
     const handleSavePeriodConfig = () => {
         updatePeriodConfigMutation.mutate({
             period_type: currentPeriodType,
@@ -1121,7 +1121,7 @@ const ViewDetailPage = () => {
         setSavedGridSize(gridSize)
     }
 
-    // Discard changes and revert to saved values
+
     const handleDiscardChanges = () => {
         setPeriodStart(savedPeriodStart)
         setPeriodEnd(savedPeriodEnd)
@@ -1131,7 +1131,7 @@ const ViewDetailPage = () => {
         setGridSize(savedGridSize)
         setHasUnsavedChanges(false)
 
-        // Recalculate custom period state
+
         if (savedPeriodType === 'custom') {
             setIsCustomPeriod(true)
         } else {
@@ -1139,7 +1139,7 @@ const ViewDetailPage = () => {
         }
     }
 
-    // Auto-calculate view with current parameters
+
     const { data: calculationResults, isLoading: isCalculating } = useQuery({
         queryKey: [STATISTICS_QUERY, "views", id, "calculate", periodStart, periodEnd, interval],
         queryFn: async () => {
@@ -1153,7 +1153,7 @@ const ViewDetailPage = () => {
         retry: false,
     })
 
-    // Extract cache statistics from metadata
+
     const cacheStats = useMemo(() => {
         if (!calculationResults?.metadata) return null
 
@@ -1196,7 +1196,7 @@ const ViewDetailPage = () => {
         deleteMutation.mutate()
     }
 
-    // Delete chart mutation
+
     const deleteChartMutation = useMutation({
         mutationFn: (chartId: string) => deleteChart(chartId),
         onSuccess: () => {
@@ -1271,7 +1271,7 @@ const ViewDetailPage = () => {
             />
 
             <div className="flex flex-col gap-6">
-                {/* Header */}
+
                 <Container className="p-6">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -1326,13 +1326,13 @@ const ViewDetailPage = () => {
                         </div>
                     </div>
 
-                    {/* Calculation Period Controls */}
+
                     <div className="border-t border-ui-border-base pt-4 mt-4">
-                        {/* Period Presets */}
+
                         <div className="mb-4">
                             <Label size="small" className="mb-2">Period</Label>
                             <div className="flex items-center gap-2">
-                                {/* Quick presets as buttons */}
+
                                 <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
                                     <div
                                         className={`flex items-center px-3 py-1.5 text-sm transition-colors border-r bg-ui-bg-disabled text-ui-fg-base `}
@@ -1381,7 +1381,7 @@ const ViewDetailPage = () => {
                                     )}
                                 </div>
 
-                                {/* More options dropdown */}
+
                                 <DropdownMenu>
                                     <DropdownMenu.Trigger asChild>
                                         <Button size="small" variant="secondary">
@@ -1463,7 +1463,7 @@ const ViewDetailPage = () => {
                         <div className="">
                             <Label size="small" className="mb-2">Interval</Label>
                             <div className="flex items-center gap-2">
-                                {/* Quick presets as buttons */}
+
                                 <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
                                     {quickIntervalPresets.map((preset) => (
                                         <button
@@ -1489,7 +1489,7 @@ const ViewDetailPage = () => {
                                     )}
                                 </div>
 
-                                {/* More options dropdown */}
+
                                 <DropdownMenu>
                                     <DropdownMenu.Trigger asChild>
                                         <Button size="small" variant="secondary">
@@ -1561,12 +1561,12 @@ const ViewDetailPage = () => {
                     </div>
                 </Container>
 
-                {/* Charts Section */}
+
                 <Container className="p-6">
                     <div className="flex items-center justify-between mb-4">
                         <Heading level="h2">Charts ({view.charts?.length || 0})</Heading>
                         <div className="flex items-center gap-2">
-                            {/* Grid size adjustment buttons */}
+
                             <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
                                 <button
                                     type="button"

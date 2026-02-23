@@ -8,7 +8,7 @@ import { emitAlertEventsStep } from "./steps/emit-alert-events";
 
 export interface EvaluateAlertsInput {
     option_id: string;
-    calculated_value: any; // The result from calculateStatistic
+    calculated_value: any;
     evaluation_scope?: {
         periodStart?: Date;
         periodEnd?: Date;
@@ -32,15 +32,15 @@ export interface EvaluateAlertsInput {
 export const evaluateAlertsWorkflow = createWorkflow(
     "evaluate-alerts",
     (input: EvaluateAlertsInput) => {
-        // Step 1: Fetch all active alerts for this option
+
         const alerts = fetchActiveAlertsForOptionStep({ option_id: input.option_id });
 
-        // Early return if no alerts
+
         const shouldContinue = transform({ alerts }, (data) => {
             return data.alerts && data.alerts.length > 0;
         });
 
-        // Step 2: Extract current and reference values from calculated result
+
         const current_values = transform({ input }, (data) => {
             return { [data.input.option_id]: data.input.calculated_value };
         });
@@ -50,21 +50,21 @@ export const evaluateAlertsWorkflow = createWorkflow(
             current_values
         });
 
-        // Step 3: Evaluate each condition
+
         const evaluation_results = evaluateEachConditionStep({
             alerts,
             extracted_values
         });
 
-        // Step 4: Check cooldown period and rate limits
+
         const allowed_alerts = dedupeAlertsStep({
             alerts,
             evaluation_results,
             evaluation_scope: input.evaluation_scope,
         });
 
-        // Step 5: Emit events for each triggered alert
-        // Subscribers will handle notification preparation and sending
+
+
         const emitted_event_ids = emitAlertEventsStep({
             alerts,
             evaluation_results,
@@ -72,7 +72,7 @@ export const evaluateAlertsWorkflow = createWorkflow(
             extracted_values
         });
 
-        // Step 6: Create alert log entries
+
         const alert_logs = createAlertLogEntriesStep({
             alerts,
             evaluation_results,

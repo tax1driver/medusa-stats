@@ -25,7 +25,7 @@ export interface UpdateViewConfigurationInput {
 export const updateViewConfigurationWorkflow = createWorkflow(
     "update-stat-view-configuration",
     (input: UpdateViewConfigurationInput) => {
-        // Update the view
+
         const updatedViewResult = updateViewStep(input);
 
         return new WorkflowResponse(updatedViewResult.length ? updatedViewResult[0] : null);
