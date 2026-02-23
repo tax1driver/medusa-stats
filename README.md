@@ -64,7 +64,7 @@ The module can also be used out-of-the-box with pre-defined statistics providers
 ### Views
 Views are collections of related statistics visualizations. They allow you to organize statistics in any way that suits your needs. Every chart in a view can display multiple statistical measurements, each based on a different statistic option.
 
-![Views Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/composite.png)
+![Views Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/view.png)
 
 ### Options
 Options are instances of statistics that are calculated with specific parameters. By changing an option's parameters, you can adjust the underlying statistic calculation. 
@@ -73,7 +73,7 @@ Options are instances of statistics that are calculated with specific parameters
 
 When editing, options can also be configured in terms of their visualization (chart type, dimensions, etc.), cache settings and other parameters.
 
-![Visualization Settings Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/view.png)
+![Visualization Settings Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/visualizations.png)
 
 ## Providers
 
