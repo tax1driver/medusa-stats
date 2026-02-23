@@ -1,5 +1,6 @@
 const { loadEnv } = require("@medusajs/framework/utils")
 loadEnv("test", process.cwd())
+const fs = require("fs")
 
 module.exports = {
     transform: {
@@ -16,7 +17,9 @@ module.exports = {
     testEnvironment: "node",
     moduleFileExtensions: ["js", "ts", "json"],
     modulePathIgnorePatterns: ["dist/"],
-    setupFiles: ["./integration-tests/setup.js"],
+    setupFiles: fs.existsSync("./integration-tests/setup.js")
+        ? ["./integration-tests/setup.js"]
+        : [],
 }
 
 if (process.env.TEST_TYPE === "integration:http") {
