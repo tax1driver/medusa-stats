@@ -243,10 +243,9 @@ Alerts can be configured per option to trigger when conditions are met.
 ### Features
 
 - Absolute and comparative conditions
-- Cooldown period and daily trigger limits
 - Alert logs
 - Scheduled evaluation job
-- Event-based notification requests
+- Event emission for custom handling
 
 ### Emitted Events
 To handle the alert triggers, register a subscriber for the `statistics.alert` event type. 
@@ -304,3 +303,9 @@ featureFlags: {
   caching: true,
 }
 ```
+
+## Planned features and improvements
+- More built-in chart types and visualization options
+- Visualization providers for custom chart types and UI components
+- Visualization on entities' details pages (e.g. product statistics on product page)
+
