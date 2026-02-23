@@ -39,7 +39,7 @@ yarn add medusa-stats
 
 Add the plugin to your `medusa-config.ts`:
 
-```ts
+```typescript
 modules: [
   {
     resolve: "medusa-stats/modules/statistics",
@@ -85,7 +85,7 @@ Providers define what statistics are available and how they are calculated.
 
 Register your provider in `medusa-config.ts` under the `medusa-stats` module:
 
-```ts
+```typescript
 modules: [
   {
     resolve: "medusa-stats",
@@ -116,7 +116,7 @@ Create a provider class by extending `AbstractStatisticsProvider`, expose availa
 
 Example: a `total_cart_value` statistic (available in the Common Statistics Provider) with filters for currency and cart status.
 
-```ts
+```typescript
 import { ModuleProvider } from "@medusajs/framework/utils"
 import {
   AbstractStatisticsProvider,
@@ -209,7 +209,7 @@ A stat option can be configured to receive another statistic's output by setting
 To make a statistic composable, define a provider parameter with `fieldType: "stat"`.
 At runtime, that parameter receives dependency output data and can be processed like any other input.
 
-```ts
+```typescript
 import { z } from "zod"
 import { StatBuilder } from "medusa-stats"
 
@@ -250,7 +250,7 @@ Alerts can be configured per option to trigger when conditions are met.
 ### Emitted Events
 To handle the alert triggers, register a subscriber for the `statistics.alert` event type. 
 
-```ts
+```typescript
 type StatisticsAlertEventData = {
   alert_id: string
   alert_name: string
@@ -270,7 +270,7 @@ In order to optimize performance, statistic results are cached for a configurabl
 ### Cache Configuration
 To use caching, `CachingModule` must be enabled in the Medusa project.
 
-```ts
+```typescript
 {
   resolve: "@medusajs/medusa/caching",
   options: {
@@ -298,7 +298,7 @@ MEDUSA_FF_CACHING=true
 or
 
 *in `medusa-config.ts`:*
-```ts
+```typescript
 featureFlags: {
   caching: true,
 }
@@ -308,4 +308,3 @@ featureFlags: {
 - More built-in chart types and visualization options
 - Visualization providers for custom chart types and UI components
 - Visualization on entities' details pages (e.g. product statistics on product page)
-
