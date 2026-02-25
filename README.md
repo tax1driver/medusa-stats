@@ -66,16 +66,16 @@ The module can also be used out-of-the-box with pre-defined statistics providers
 ### Views
 Views are collections of related statistics visualizations. They allow you to organize statistics in any way that suits your needs. Every chart in a view can display multiple statistical measurements, each based on a different statistic option.
 
-![Views Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/view.png)
+![Views Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/view.png)
 
 ### Options
 Options are instances of statistics that are calculated with specific parameters. By changing an option's parameters, you can adjust the underlying statistic calculation. 
 
-![Options Parameters Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/params.png)
+![Options Parameters Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/params.png)
 
 When editing, options can also be configured in terms of their visualization (chart type, dimensions, etc.), cache settings and other parameters.
 
-![Visualization Settings Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/visualizations.png)
+![Visualization Settings Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/visualizations.png)
 
 ## Providers
 
@@ -202,7 +202,7 @@ Composite statistics allow one statistic option to use another option's output a
 ### Admin Usage
 A stat option can be configured to receive another statistic's output by settings its value in the Dependecnies section when editing a stat instance in the admin dashboard.
 
-![Dependencies Image](https://github.com/tax1driver/medusa-stats/blob/bf9e67fccc7fb29c2153e4b06194309b6177c12b/public/composite.png)
+![Dependencies Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/composite.png)
 
 ### Using composite fields in providers
 
