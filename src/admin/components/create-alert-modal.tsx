@@ -126,7 +126,7 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto">
             <div>
                 <h3 className="text-sm font-medium mb-3">Select Provider and Statistic</h3>
                 <Table>
@@ -681,7 +681,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                 </ProgressTabs.Content>
 
                                 <ProgressTabs.Content value="statistic">
-                                    <div className="space-y-4">
+                                    <div className="space-y-4 overflow-hidden">
                                         <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
                                             <button
                                                 type="button"
