@@ -12,6 +12,13 @@
   Medusa Stats
 </h2>
 
+<h5 align="center">
+  <a href="https://docs.medusajs.com">MedusaJS</a> |
+  <a href="https://www.npmjs.com/package/medusa-stats">npm</a> |
+  <a href="https://github.com/tax1driver/medusa-stats">Repository</a>
+</h5>
+
+
 <br>
 
 ## Overview
