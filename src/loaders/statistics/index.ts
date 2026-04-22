@@ -24,11 +24,7 @@ const registrationFn = async (klass: any, container: MedusaContainer, pluginOpti
         )
     }
 
-    const key = `sp_${klass.identifier}${pluginOptions.id ? `_${pluginOptions.id}` : ""
-        }`
-
-
-
+    const key = `sp_${klass.identifier}${pluginOptions.id ? `_${pluginOptions.id}` : ""}`;
 
     container.register({
         [key]: asValue(klass),

@@ -1,12 +1,16 @@
 {
   "name": "medusa-stats",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "The most flexible statistics plugin for the most flexible commerce platform.",
   "author": "Maciej (https://github.com/tax1driver)",
   "license": "MIT",
   "files": [
     ".medusa/server"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tax1driver/medusa-stats.git"
+  },
   "exports": {
     "./package.json": "./package.json",
     "./workflows": "./.medusa/server/src/workflows/index.js",
