@@ -1,10 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
-/**
- * GET /admin/statistics/alerts/:id/logs
- * Get alert logs for a specific alert
- */
+
 export async function GET(
     req: MedusaRequest,
     res: MedusaResponse

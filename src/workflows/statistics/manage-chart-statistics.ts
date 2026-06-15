@@ -7,10 +7,6 @@ export interface ManageChartStatisticsInput {
     remove_statistic_ids?: string[];
 }
 
-/**
- * Manages statistics (series) in a chart.
- * Can add and/or remove statistics in a single operation.
- */
 export const manageChartStatisticsWorkflow = createWorkflow(
     "manage-chart-statistics",
     (input: ManageChartStatisticsInput) => {

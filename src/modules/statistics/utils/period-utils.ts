@@ -1,7 +1,3 @@
-/**
- * Utility functions for calculating date ranges from period strategies
- */
-
 export type PeriodType = 'calendar' | 'custom';
 
 export interface CalendarPeriodConfig {
@@ -23,9 +19,6 @@ export interface DateRange {
     end: Date;
 }
 
-/**
- * Calculate date range from a period strategy
- */
 export function calculateDatesFromPeriod(period: PeriodStrategy, referenceDate: Date = new Date()): DateRange {
     const now = new Date(referenceDate);
     let start = new Date(now);

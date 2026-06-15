@@ -16,19 +16,6 @@ export interface EvaluateAlertsInput {
     };
 }
 
-/**
- * Workflow: Evaluate Alerts After Calculation
- * 
- * Purpose: Check alert conditions after statistic calculation and trigger notifications
- * 
- * Steps:
- * - fetch-active-alerts-for-option - Get all enabled alerts for calculated option
- * - extract-alert-values - Extract current and reference values from calculated result
- * - evaluate-each-condition - Check if alert conditions are met
- * - check-cooldown-period - Verify alert hasn't fired recently (rate limiting)
- * - emit-alert-triggered-events - Emit events for each triggered alert
- * - create-alert-log-entries - Record alert triggers and delivery status
- */
 export const evaluateAlertsWorkflow = createWorkflow(
     "evaluate-alerts",
     (input: EvaluateAlertsInput) => {

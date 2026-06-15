@@ -2,10 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { calculateViewWorkflow } from "../../../../../../workflows/statistics";
 import type { CalculateViewInput } from "../../../../../validation/statistics/schemas";
 
-/**
- * POST /admin/statistics/views/:id/calculate
- * Calculate statistics for a view
- */
+
 export async function POST(
     req: MedusaRequest<CalculateViewInput>,
     res: MedusaResponse

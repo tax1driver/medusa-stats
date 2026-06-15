@@ -3,10 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { updateChartWorkflow, deleteChartWorkflow, type UpdateChartInput } from "../../../../../workflows/statistics";
 import type { UpdateChartInput as UpdateChartBodyInput } from "../../../../validation/statistics/schemas";
 
-/**
- * GET /admin/statistics/charts/:id
- * Get a specific chart
- */
+
 export async function GET(
     req: MedusaRequest,
     res: MedusaResponse
@@ -25,10 +22,7 @@ export async function GET(
     res.json({ chart: charts[0] });
 }
 
-/**
- * POST /admin/statistics/charts/:id
- * Update a chart
- */
+
 export async function POST(
     req: MedusaRequest<UpdateChartBodyInput>,
     res: MedusaResponse
@@ -43,10 +37,7 @@ export async function POST(
     res.json({ chart: result });
 }
 
-/**
- * DELETE /admin/statistics/charts/:id
- * Delete a chart
- */
+
 export async function DELETE(
     req: MedusaRequest,
     res: MedusaResponse

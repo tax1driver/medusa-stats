@@ -3,10 +3,7 @@ import { STATISTICS_MODULE } from "../../../../../../modules/statistics";
 import StatisticsService from "../../../../../../modules/statistics/service";
 import type { CloneOptionInput } from "../../../../../validation/statistics/schemas";
 
-/**
- * POST /admin/statistics/options/:id/clone
- * Clone a statistics option with customizations
- */
+
 export async function POST(
     req: AuthenticatedMedusaRequest<CloneOptionInput>,
     res: MedusaResponse

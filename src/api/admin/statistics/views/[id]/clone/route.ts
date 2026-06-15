@@ -2,10 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { cloneViewWorkflow } from "../../../../../../workflows/statistics";
 import type { CloneViewInput } from "../../../../../validation/statistics/schemas";
 
-/**
- * POST /admin/statistics/views/:id/clone
- * Clone a view with its options
- */
+
 export async function POST(
     req: MedusaRequest<CloneViewInput>,
     res: MedusaResponse

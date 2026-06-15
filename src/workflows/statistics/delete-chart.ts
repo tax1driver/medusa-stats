@@ -5,10 +5,6 @@ export interface DeleteChartInput {
     id: string;
 }
 
-/**
- * Deletes a chart.
- * Associated statistics (series) are not deleted, only unlinked from the chart.
- */
 export const deleteChartWorkflow = createWorkflow(
     "delete-chart",
     (input: DeleteChartInput) => {

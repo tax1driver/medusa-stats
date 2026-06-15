@@ -4,10 +4,6 @@ import { STATISTICS_MODULE } from "../../../../../modules/statistics";
 import StatisticsService from "../../../../../modules/statistics/service";
 import type { UpdateAlertInput } from "../../../../validation/statistics/schemas";
 
-/**
- * GET /admin/statistics/alerts/:id
- * Get a specific alert
- */
 export async function GET(
     req: MedusaRequest,
     res: MedusaResponse
@@ -26,10 +22,6 @@ export async function GET(
     res.json({ alert: alerts[0] });
 }
 
-/**
- * POST /admin/statistics/alerts/:id
- * Update an alert
- */
 export async function POST(
     req: MedusaRequest<UpdateAlertInput>,
     res: MedusaResponse

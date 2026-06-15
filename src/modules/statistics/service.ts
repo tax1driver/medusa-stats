@@ -35,9 +35,6 @@ export default class StatisticsService extends MedusaService({
         return this.providerRepository_.upsert(data, context);
     }
 
-    /**
-     * Get provider instance with QueryModule injected via child container
-     */
     getProvider(providerId: string, query: Query): AbstractStatisticsProvider {
         const ProviderClass = this.container_[providerId];
         if (!ProviderClass) {
@@ -57,9 +54,6 @@ export default class StatisticsService extends MedusaService({
         return new ProviderClass(childContainer);
     }
 
-    /**
-     * Add statistics (series) to a chart
-     */
     async addStatisticsToChart(
         chartId: string,
         statisticIds: string[],
@@ -77,9 +71,6 @@ export default class StatisticsService extends MedusaService({
         return { chart: updatedChart };
     }
 
-    /**
-     * Remove statistics (series) from a chart
-     */
     async removeStatisticsFromChart(
         chartId: string,
         statisticIds: string[],
@@ -96,14 +87,6 @@ export default class StatisticsService extends MedusaService({
         return { chart: updatedChart };
     }
 
-
-
-
-
-    /**
-     * Validate if an option can be deleted (check dependencies)
-     * Throws error if option is used as input by other composite statistics
-     */
     async validateOptionDeletion(ids: string | string[]): Promise<void> {
         const idArray = Array.isArray(ids) ? ids : [ids];
 
@@ -127,10 +110,6 @@ export default class StatisticsService extends MedusaService({
         }
     }
 
-    /**
-     * Clone a statistics option with all its configuration and dependencies
-     * Creates an independent copy that can be customized
-     */
     async cloneOption(
         sourceId: string,
         overrides: {
@@ -218,10 +197,6 @@ export default class StatisticsService extends MedusaService({
         return await cloneRecursive(sourceId, true);
     }
 
-    /**
-     * Get complete dependency graph for an option
-     * Recursively builds tree structure for visualization
-     */
     async getDependencyGraph(optionId: string): Promise<any> {
         const visited = new Set<string>();
 
@@ -264,10 +239,6 @@ export default class StatisticsService extends MedusaService({
         return buildTree(optionId);
     }
 
-    /**
-     * List preset options available for cloning
-     * Convenience method for filtering preset options
-     */
     async listPresets(filters: any = {}, config: any = {}) {
         return this.listStatisticsOptions(
             { ...filters, preset: true },

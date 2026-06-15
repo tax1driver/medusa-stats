@@ -5,10 +5,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { Query } from "@medusajs/framework";
 import type { ListProvidersQuery } from "../../../validation/statistics/schemas";
 
-/**
- * GET /admin/statistics/providers
- * List all statistics providers
- */
+
 export async function GET(
     req: MedusaRequest<ListProvidersQuery>,
     res: MedusaResponse

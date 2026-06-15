@@ -8,10 +8,7 @@ import type { UpdateViewInput } from "../../../../validation/statistics/schemas"
 import { logger } from "@medusajs/framework";
 
 
-/**
- * GET /admin/statistics/views/:id
- * Get a specific view
- */
+
 export async function GET(
     req: MedusaRequest,
     res: MedusaResponse
@@ -58,10 +55,7 @@ export async function GET(
     res.json({ view });
 }
 
-/**
- * POST /admin/statistics/views/:id
- * Update a view
- */
+
 export async function POST(
     req: MedusaRequest<UpdateViewInput>,
     res: MedusaResponse
@@ -84,10 +78,7 @@ export async function POST(
     res.json(result);
 }
 
-/**
- * DELETE /admin/statistics/views/:id
- * Delete a view
- */
+
 export async function DELETE(
     req: MedusaRequest,
     res: MedusaResponse

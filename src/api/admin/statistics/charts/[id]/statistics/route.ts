@@ -1,10 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { manageChartStatisticsWorkflow } from "../../../../../../workflows/statistics";
 
-/**
- * PUT /admin/statistics/charts/:id/statistics
- * Add statistics to a chart
- */
+
 export async function PUT(
     req: MedusaRequest<{ statistic_ids: string[] }>,
     res: MedusaResponse
@@ -24,10 +21,7 @@ export async function PUT(
     });
 }
 
-/**
- * DELETE /admin/statistics/charts/:id/statistics
- * Remove statistics from a chart
- */
+
 export async function DELETE(
     req: MedusaRequest<{ statistic_ids: string[] }>,
     res: MedusaResponse

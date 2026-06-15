@@ -3,10 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { createViewWithOptionsWorkflow } from "../../../../workflows/statistics";
 import type { CreateViewInput, ListViewsQuery } from "../../../validation/statistics/schemas";
 
-/**
- * GET /admin/statistics/views
- * List all statistics views
- */
+
 export async function GET(
     req: MedusaRequest<ListViewsQuery>,
     res: MedusaResponse
@@ -58,10 +55,7 @@ export async function GET(
     });
 }
 
-/**
- * POST /admin/statistics/views
- * Create a new statistics view with options
- */
+
 export async function POST(
     req: MedusaRequest<CreateViewInput>,
     res: MedusaResponse

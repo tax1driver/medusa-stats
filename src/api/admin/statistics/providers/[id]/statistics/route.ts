@@ -1,10 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { getAvailableStatisticsWorkflow } from "../../../../../../workflows/statistics/get-available-statistics";
 
-/**
- * GET /admin/statistics/providers/:id/statistics
- * Get available statistics from a provider
- */
+
 export async function GET(
     req: MedusaRequest,
     res: MedusaResponse

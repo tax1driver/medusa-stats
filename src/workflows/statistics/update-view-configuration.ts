@@ -14,14 +14,6 @@ export interface UpdateViewConfigurationInput {
     interval?: number;
 }
 
-/**
- * Updates a statistics view configuration.
- * 
- * Note: Cached statistics are not automatically invalidated when view configuration changes.
- * Cache invalidation requires specific state parameters (periodStart, periodEnd, interval).
- * Cached data will expire naturally via TTL (600s), or can be manually invalidated via
- * the cache invalidation endpoint with specific state parameters if immediate refresh is needed.
- */
 export const updateViewConfigurationWorkflow = createWorkflow(
     "update-stat-view-configuration",
     (input: UpdateViewConfigurationInput) => {

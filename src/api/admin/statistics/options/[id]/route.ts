@@ -5,10 +5,7 @@ import StatisticsService from "../../../../../modules/statistics/service";
 import type { UpdateOptionInput } from "../../../../validation/statistics/schemas";
 import { hydrateOptionsWithDependencies } from "../../utils/option-graph";
 
-/**
- * GET /admin/statistics/options/:id
- * Get a specific option
- */
+
 export async function GET(
     req: MedusaRequest,
     res: MedusaResponse
@@ -29,10 +26,7 @@ export async function GET(
     res.json({ option: hydratedOptions[0] });
 }
 
-/**
- * POST /admin/statistics/options/:id
- * Update an option (including composite statistics fields)
- */
+
 export async function POST(
     req: MedusaRequest<UpdateOptionInput>,
     res: MedusaResponse
@@ -76,10 +70,6 @@ export async function POST(
     res.json({ option });
 }
 
-/**
- * DELETE /admin/statistics/options/:id
- * Delete an option (with composite statistics dependency validation)
- */
 export async function DELETE(
     req: MedusaRequest,
     res: MedusaResponse

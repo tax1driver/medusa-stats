@@ -27,13 +27,9 @@ export interface CreateViewWithOptionsInput {
 export const createViewWithOptionsWorkflow = createWorkflow(
     "create-view-with-options",
     (input: CreateViewWithOptionsInput) => {
-
         validateViewInputStep(input.view);
 
-
         const view = createStatisticsViewStep(input.view);
-
-
         const providerIds = transform(input.options, (input) => {
             return [...new Set(input.map(opt => opt.provider_id))];
         });

@@ -10,9 +10,6 @@ export interface UpdateChartInput {
     metadata?: Record<string, any> | null;
 }
 
-/**
- * Updates a chart's configuration.
- */
 export const updateChartWorkflow = createWorkflow(
     "update-chart",
     (input: UpdateChartInput) => {

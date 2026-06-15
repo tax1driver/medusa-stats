@@ -2,10 +2,6 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { STATISTICS_MODULE } from "../../../../../../modules/statistics";
 import StatisticsService from "../../../../../../modules/statistics/service";
 
-/**
- * POST /admin/statistics/alerts/:id/toggle
- * Toggle alert enabled status
- */
 export async function POST(
     req: MedusaRequest,
     res: MedusaResponse

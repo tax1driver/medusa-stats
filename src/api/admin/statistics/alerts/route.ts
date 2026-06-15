@@ -4,10 +4,6 @@ import { STATISTICS_MODULE } from "../../../../modules/statistics";
 import { createAlertWorkflow } from "../../../../workflows/statistics";
 import type { CreateAlertInput, ListAlertsQuery } from "../../../validation/statistics/schemas";
 
-/**
- * GET /admin/statistics/alerts
- * List all alerts
- */
 export async function GET(
     req: MedusaRequest<ListAlertsQuery>,
     res: MedusaResponse
@@ -74,10 +70,7 @@ export async function GET(
     });
 }
 
-/**
- * POST /admin/statistics/alerts
- * Create a new alert
- */
+
 export async function POST(
     req: MedusaRequest<CreateAlertInput>,
     res: MedusaResponse

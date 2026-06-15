@@ -5,10 +5,7 @@ import StatisticsService from "../../../../modules/statistics/service";
 import type { CreateOptionInput, ListOptionsQuery } from "../../../validation/statistics/schemas";
 import { hydrateOptionsWithDependencies } from "../utils/option-graph";
 
-/**
- * GET /admin/statistics/options
- * List all statistics options
- */
+
 export async function GET(
     req: MedusaRequest<ListOptionsQuery>,
     res: MedusaResponse
@@ -79,10 +76,7 @@ export async function GET(
     });
 }
 
-/**
- * POST /admin/statistics/options
- * Create a new statistics option
- */
+
 export async function POST(
     req: MedusaRequest<CreateOptionInput>,
     res: MedusaResponse
