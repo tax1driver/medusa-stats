@@ -6,10 +6,14 @@ import {
     Badge,
     Text,
     usePrompt,
+    toast,
 } from "@medusajs/ui"
-import { Trash, Plus } from "@medusajs/icons"
+import { Trash, Plus, BookOpen } from "@medusajs/icons"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { OptionEditPanel } from "./option-edit-panel"
-import type { StatisticsOption, SeriesVisualizationConfig, InputDependency } from "../lib/statistics/api"
+import { cloneOption, createOption, type StatisticsOption, type SeriesVisualizationConfig, type InputDependency } from "../lib/statistics/api"
+import { STATISTICS_QUERY } from "../lib/queries"
+import { useTranslation } from "react-i18next"
 
 export type OptionEditDrawerProps = {
     open: boolean
@@ -72,6 +76,8 @@ export const OptionEditDrawer = ({
 }: OptionEditDrawerProps) => {
     const [activeTab, setActiveTab] = useState<string | null>(null)
     const prompt = usePrompt()
+    const queryClient = useQueryClient()
+    const { t } = useTranslation("stats");
     const [editedData, setEditedData] = useState<Record<string, Record<string, any>>>({})
     const [editedNames, setEditedNames] = useState<Record<string, string>>({})
     const [editedVisualizations, setEditedVisualizations] = useState<Record<string, SeriesVisualizationConfig>>({})
@@ -187,6 +193,26 @@ export const OptionEditDrawer = ({
         }
     }
 
+    const saveAsPresetMutation = useMutation({
+        mutationFn: async () => {
+            const currentOpt = options[0]
+            if (!currentOpt) throw new Error("No option selected")
+
+            return cloneOption(currentOpt.id, {
+                local_option_name: (editedNames[currentOpt.id] || currentOpt.local_option_name) + " (Preset)",
+                preset: true,
+            })
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [STATISTICS_QUERY, "presets"] })
+            queryClient.invalidateQueries({ queryKey: [STATISTICS_QUERY, "options"] })
+            toast.success("Preset saved", { description: "Option saved as a reusable preset." })
+        },
+        onError: (error) => {
+            toast.error("Failed to save preset", { description: error instanceof Error ? error.message : "Unknown error" })
+        },
+    })
+
     const renderOptionItem = (option: StatisticsOption, depth = 0) => {
         const isActive = activeTab === option.id
 
@@ -210,7 +236,7 @@ export const OptionEditDrawer = ({
                     >
                         <div className="font-medium truncate">{option.local_option_name}</div>
                         <div className="text-ui-fg-subtle text-xs truncate mt-0.5">
-                            {option.provider?.display_name || option.provider?.id || option.provider_id}
+                            {t(`${option.provider_id || option.provider?.id}.name`, option.provider_id)}
                         </div>
                         {childOptions.length > 0 && (
                             <Badge size="xsmall" color="blue" className="mt-1">
@@ -363,9 +389,20 @@ export const OptionEditDrawer = ({
                     <Button variant="secondary" onClick={() => onOpenChange(false)}>
                         Cancel
                     </Button>
-                    <Button onClick={handleSaveAll} isLoading={isSaving} disabled={loading || isSaving}>
-                        Save All Changes
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => saveAsPresetMutation.mutate()}
+                            isLoading={saveAsPresetMutation.isPending}
+                            disabled={options.length === 0 || loading}
+                        >
+                            <BookOpen className="mr-1" />
+                            Save as Preset
+                        </Button>
+                        <Button onClick={handleSaveAll} isLoading={isSaving} disabled={loading || isSaving}>
+                            Save All Changes
+                        </Button>
+                    </div>
                 </Drawer.Footer>
             </Drawer.Content>
         </Drawer>

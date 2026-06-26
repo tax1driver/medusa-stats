@@ -1,0 +1,468 @@
+{
+    "chart_types": {
+        "2d": "2D Chart",
+        "aggregate": "Aggregate",
+        "list": "List"
+    },
+    "providers": {
+        "title": "Providers",
+        "active": "Active",
+        "disabled": "Disabled",
+        "statistics_count": "{{count}} available",
+        "available_statistics": "Available Data Sources",
+        "no_providers": "No providers found",
+        "table": {
+            "provider": "Provider",
+            "statistics": "Data Sources",
+            "status": "Status"
+        }
+    },
+    "alerts": {
+        "create_title": "Create Alert",
+        "edit_title": "Edit Alert",
+        "create_description": "Set up a new alert",
+        "edit_description": "Update alert configuration and thresholds",
+        "tabs": {
+            "info": "Alert Information",
+            "statistic": "Data Source",
+            "parameters": "Parameters",
+            "condition": "Alert Condition"
+        },
+        "severity": {
+            "info": "Info",
+            "warning": "Warning",
+            "critical": "Critical"
+        },
+        "selection": {
+            "provider_sources": "Provider Sources",
+            "preset_options": "Preset Options",
+            "select_provider": "Select Provider and Function",
+            "available_functions": "Available Functions",
+            "select_preset": "Select Preset Option",
+            "selected": "Selected",
+            "no_presets": "No preset options available.",
+            "no_statistic": "Please select a statistic first",
+            "no_params": "This statistic does not require any parameters",
+            "no_preset_selected": "Please select a preset option first",
+            "preset_info": "This alert uses a cloned preset option. Parameter configuration is copied from the selected preset.",
+            "configure_params": "Configure Parameters"
+        },
+        "back": "Back",
+        "next": "Next",
+        "create": "Create Alert",
+        "save_changes": "Save Changes",
+        "name_label": "Alert Name",
+        "name_placeholder": "e.g., Low Revenue Alert",
+        "description_label": "Description",
+        "description_placeholder": "Describe when this alert should trigger...",
+        "severity_label": "Severity"
+    },
+    "sp_common-statistics": {
+        "name": "Common",
+        "cart_progress_breakdown": {
+            "name": "Cart Progress Breakdown",
+            "description": "Break down carts by their progress stage",
+            "fields": {
+                "include_completed": {
+                    "name": "Include Completed",
+                    "description": "Include completed carts in the breakdown"
+                }
+            }
+        },
+        "average_cart_value": {
+            "name": "Average Cart Value",
+            "description": "Average value of carts over time",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                },
+                "status": {
+                    "name": "Cart Status",
+                    "description": "Filter by cart status",
+                    "options": {
+                        "all": "All Carts",
+                        "completed": "Completed",
+                        "active": "Active",
+                        "abandoned": "Abandoned"
+                    }
+                }
+            }
+        },
+        "abandoned_cart_value": {
+            "name": "Abandoned Cart Value",
+            "description": "Average value of abandoned carts",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                },
+                "abandoned_after_hours": {
+                    "name": "Abandoned After Hours",
+                    "description": "Consider cart abandoned after this many hours"
+                }
+            }
+        },
+        "total_cart_value": {
+            "name": "Total Cart Value",
+            "description": "Total value of all carts over time",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "order_refund_ratio": {
+            "name": "Order Refund Ratio",
+            "description": "Ratio of refunds to total sales (%)",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "order_promotion_ratio": {
+            "name": "Order Promotion Ratio",
+            "description": "Ratio of discounts to total sales (%)",
+            "fields": {}
+        },
+        "total_promotions_value": {
+            "name": "Total Promotions Value",
+            "description": "Total value of discounts applied to orders",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "orders_by_status": {
+            "name": "Orders by Status",
+            "description": "Count of orders grouped by status",
+            "fields": {
+                "statuses": {
+                    "name": "Statuses",
+                    "description": "Order statuses to include",
+                    "options": {
+                        "pending": "Pending",
+                        "completed": "Completed",
+                        "canceled": "Canceled",
+                        "requires_action": "Requires Action"
+                    }
+                }
+            }
+        },
+        "average_units_per_order": {
+            "name": "Average Units per Order",
+            "description": "Average number of items per order",
+            "fields": {}
+        },
+        "orders_by_time": {
+            "name": "Orders by Time",
+            "description": "Number of orders over time",
+            "fields": {
+                "status": {
+                    "name": "Order Status",
+                    "description": "Filter by order status",
+                    "options": {
+                        "all": "All Orders",
+                        "completed": "Completed",
+                        "pending": "Pending",
+                        "canceled": "Canceled"
+                    }
+                }
+            }
+        },
+        "orders_chart": {
+            "name": "Orders Chart",
+            "description": "Comprehensive orders visualization",
+            "fields": {
+                "metric": {
+                    "name": "Metric",
+                    "description": "What to measure",
+                    "options": {
+                        "count": "Order Count",
+                        "total_value": "Total Value",
+                        "average_value": "Average Value"
+                    }
+                }
+            }
+        },
+        "orders_frequency_distribution": {
+            "name": "Orders Frequency Distribution",
+            "description": "Distribution of time between repeat orders",
+            "fields": {
+                "bucket_size": {
+                    "name": "Bucket Size (days)",
+                    "description": "Size of time buckets in days"
+                }
+            }
+        },
+        "regions_popularity": {
+            "name": "Regions Popularity",
+            "description": "Most popular regions by order count",
+            "fields": {
+                "limit": {
+                    "name": "Limit",
+                    "description": "Number of regions to show"
+                }
+            }
+        },
+        "sales_channel_popularity": {
+            "name": "Sales Channel Popularity",
+            "description": "Order count by sales channel",
+            "fields": {}
+        },
+        "payment_provider_popularity": {
+            "name": "Payment Provider Popularity",
+            "description": "Most popular payment providers",
+            "fields": {}
+        },
+        "average_sales": {
+            "name": "Average Sales",
+            "description": "Average sales value over time",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "sales_per_channel": {
+            "name": "Sales per Channel",
+            "description": "Total sales by sales channel",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "net_sales": {
+            "name": "Net Sales",
+            "description": "Net sales (total minus discounts and refunds)",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                },
+                "include_tax": {
+                    "name": "Include Tax",
+                    "description": "Include tax in net calculation"
+                }
+            }
+        },
+        "sales_by_time": {
+            "name": "Sales by Time",
+            "description": "Total sales value over time",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "sales_by_currency": {
+            "name": "Sales by Currency",
+            "description": "Sales breakdown by currency",
+            "fields": {}
+        },
+        "sales_chart": {
+            "name": "Sales Chart",
+            "description": "Comprehensive sales visualization",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                },
+                "include_refunds": {
+                    "name": "Include Refunds",
+                    "description": "Include refunded amounts in total"
+                }
+            }
+        },
+        "refunds_total": {
+            "name": "Refunds Total",
+            "description": "Total refunded value over time",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "average_sales_per_customer": {
+            "name": "Average Sales per Customer",
+            "description": "Average sales value per customer",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                },
+                "customer_segment": {
+                    "name": "Customer Segment",
+                    "description": "Filter by customer type",
+                    "options": {
+                        "all": "All Customers",
+                        "new": "New Customers",
+                        "returning": "Returning Customers"
+                    }
+                }
+            }
+        },
+        "customer_lifetime_value": {
+            "name": "Customer Lifetime Value",
+            "description": "Average lifetime value of customers",
+            "fields": {
+                "currency_code": {
+                    "name": "Currency",
+                    "description": "Filter by currency code"
+                }
+            }
+        },
+        "new_customers_by_time": {
+            "name": "New Customers by Time",
+            "description": "Number of new customers over time",
+            "fields": {}
+        },
+        "repeat_customer_rate": {
+            "name": "Repeat Customer Rate",
+            "description": "Percentage of customers making multiple orders",
+            "fields": {
+                "minimum_orders": {
+                    "name": "Minimum Orders",
+                    "description": "Minimum number of orders to count as repeat"
+                }
+            }
+        },
+        "customers_chart": {
+            "name": "Customers Chart",
+            "description": "Comprehensive customer visualization",
+            "fields": {
+                "metric": {
+                    "name": "Metric",
+                    "description": "What to measure",
+                    "options": {
+                        "total": "Total Customers",
+                        "new": "New Customers",
+                        "active": "Active Customers",
+                        "returning": "Returning Customers"
+                    }
+                }
+            }
+        },
+        "cumulative_customers": {
+            "name": "Cumulative Customers",
+            "description": "Running total of customers over time",
+            "fields": {}
+        },
+        "customer_retention_rate": {
+            "name": "Customer Retention Rate",
+            "description": "Percentage of customers retained over time",
+            "fields": {
+                "cohort_period": {
+                    "name": "Cohort Period",
+                    "description": "Time period for retention analysis",
+                    "options": {
+                        "day": "Daily",
+                        "week": "Weekly",
+                        "month": "Monthly"
+                    }
+                }
+            }
+        },
+        "top_variants": {
+            "name": "Top Variants",
+            "description": "Most popular product variants",
+            "fields": {
+                "limit": {
+                    "name": "Limit",
+                    "description": "Number of variants to show"
+                },
+                "metric": {
+                    "name": "Metric",
+                    "description": "Rank by quantity or revenue",
+                    "options": {
+                        "quantity": "Quantity Sold",
+                        "revenue": "Revenue"
+                    }
+                }
+            }
+        },
+        "top_returned_variants": {
+            "name": "Top Returned Variants",
+            "description": "Most returned product variants",
+            "fields": {
+                "limit": {
+                    "name": "Limit",
+                    "description": "Number of variants to show"
+                }
+            }
+        },
+        "products_sold_count": {
+            "name": "Products Sold Count",
+            "description": "Number of products sold over time",
+            "fields": {
+                "count_type": {
+                    "name": "Count Type",
+                    "description": "Count unique products or total units",
+                    "options": {
+                        "total_units": "Total Units",
+                        "unique_products": "Unique Products"
+                    }
+                }
+            }
+        },
+        "out_of_stock_variants": {
+            "name": "Out of Stock Variants",
+            "description": "Number of variants below stock threshold",
+            "fields": {
+                "location_id": {
+                    "name": "Location ID",
+                    "description": "Filter by stock location"
+                },
+                "threshold": {
+                    "name": "Stock Threshold",
+                    "description": "Consider out of stock below this level"
+                }
+            }
+        }
+    },
+    "sp_composite-statistics": {
+        "name": "Composite",
+        "moving_average": {
+            "name": "Moving Average",
+            "description": "Smooth a time series by averaging values over a rolling window",
+            "fields": {
+                "input_series": {
+                    "name": "Input Series",
+                    "description": "Dependency result to analyze"
+                },
+                "window_size": {
+                    "name": "Window Size",
+                    "description": "Number of points in each rolling average window"
+                }
+            }
+        },
+        "rate_of_change": {
+            "name": "Rate of Change",
+            "description": "Measures momentum as change versus N periods ago",
+            "fields": {
+                "input_series": {
+                    "name": "Input Series",
+                    "description": "Dependency result to analyze"
+                },
+                "periods": {
+                    "name": "Lookback Periods",
+                    "description": "Compare each point against the value this many points back"
+                },
+                "as_percentage": {
+                    "name": "As Percentage",
+                    "description": "Return percent change (true) or decimal ratio (false)"
+                }
+            }
+        }
+    }
+}

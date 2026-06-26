@@ -17,7 +17,7 @@ import {
     Text,
     toast,
 } from "@medusajs/ui"
-import { ArrowDownTray, EllipsisHorizontal, PencilSquare } from "@medusajs/icons"
+import { ArrowDownTray, EllipsisHorizontal, PencilSquare, Trash } from "@medusajs/icons"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 import { STATISTICS_QUERY } from "../../../lib/queries"
@@ -27,15 +27,17 @@ import {
     getOption,
     updateOption,
     createOption,
+    deleteOption,
     listProviders,
     type StatisticsOption,
     type SeriesVisualizationConfig,
 } from "../../../lib/statistics/api"
 import { OptionEditDrawer } from "../../../components/option-edit-drawer"
 import { OptionSelector } from "../../../components/option-selector-modal"
+import { useTranslation } from "react-i18next"
 
 export const config = defineRouteConfig({
-    label: "Option Presets",
+    label: "Presets",
     icon: ArrowDownTray,
 })
 
@@ -62,9 +64,9 @@ const AddPresetFromStatisticDrawer = ({
         <Drawer open={open} onOpenChange={onOpenChange}>
             <Drawer.Content>
                 <Drawer.Header>
-                    <Drawer.Title>Select Statistic for Preset</Drawer.Title>
+                    <Drawer.Title>Select Data Sources for Preset</Drawer.Title>
                     <Drawer.Description className="!txt-compact-small-plus">
-                        Choose a statistic to create a reusable preset
+                        Choose a data source to create a reusable preset
                     </Drawer.Description>
                 </Drawer.Header>
 
@@ -225,6 +227,19 @@ const PresetsPage = () => {
         },
     })
 
+    const deletePresetMutation = useMutation({
+        mutationFn: (preset: StatisticsOption) => deleteOption(preset.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [STATISTICS_QUERY, "presets"] })
+            queryClient.invalidateQueries({ queryKey: [STATISTICS_QUERY, "options"] })
+            toast.success("Preset deleted")
+        },
+        onError: (error: unknown) => {
+            const message = error instanceof Error ? error.message : "Failed to delete preset"
+            toast.error(message)
+        },
+    })
+
     const rowCount = useMemo(() => {
         return presetsData?.count || 0
     }, [presetsData?.count])
@@ -296,8 +311,10 @@ const PresetsPage = () => {
                 },
             }),
             columnHelper.accessor("provider", {
-                header: "Root Provider",
+                header: "Source",
                 cell: ({ row, getValue }) => {
+                    const { t } = useTranslation("stats");
+
                     if ((row.original as any).isLoading) {
                         return <Skeleton className="h-5 w-24" />
                     }
@@ -305,27 +322,7 @@ const PresetsPage = () => {
                     const provider = getValue()
                     return (
                         <Badge size="small" color="grey">
-                            {provider?.display_name || provider?.id}
-                        </Badge>
-                    )
-                },
-            }),
-            columnHelper.display({
-                id: "composite",
-                header: "Composite",
-                cell: ({ row }) => {
-                    if ((row.original as any).isLoading) {
-                        return <Skeleton className="h-5 w-20" />
-                    }
-
-                    const count = row.original.input_dependencies?.length || 0
-                    if (!count) {
-                        return <Text className="text-ui-fg-subtle text-sm">-</Text>
-                    }
-
-                    return (
-                        <Badge size="small" color="blue">
-                            {count} {count === 1 ? "dependency" : "dependencies"}
+                            {provider ? t(`sp_${provider.id}.name`, provider.id) : "Unknown"}
                         </Badge>
                     )
                 },
@@ -360,6 +357,17 @@ const PresetsPage = () => {
                                     <PencilSquare className="mr-2" />
                                     Edit
                                 </DropdownMenu.Item>
+                                <DropdownMenu.Separator />
+                                <DropdownMenu.Item
+                                    onClick={() => {
+                                        if (window.confirm(`Delete preset "${row.original.local_option_name}"?`)) {
+                                            deletePresetMutation.mutate(row.original)
+                                        }
+                                    }}
+                                >
+                                    <Trash className="mr-2" />
+                                    Delete
+                                </DropdownMenu.Item>
                             </DropdownMenu.Content>
                         </DropdownMenu>
                     )
@@ -388,6 +396,9 @@ const PresetsPage = () => {
         getRowId: (row) => row.id,
         rowCount,
         isLoading: false,
+        onRowClick: (e, row) => {
+            handleEdit(row);
+        },
         search: {
             state: search,
             onSearchChange: setSearch,
@@ -418,9 +429,13 @@ const PresetsPage = () => {
                 </div>
 
                 {!isLoading && rowCount === 0 && search.trim() === "" && !providerFilter ? (
-                    <div className="flex h-[150px] w-full flex-col items-center justify-center gap-y-2">
-                        <p className="font-medium font-sans txt-compact-small">No presets</p>
-                        <p className="font-normal font-sans txt-small text-ui-fg-muted">Create your first preset to reuse statistic configurations.</p>
+                    <div className="flex h-[150px] w-full flex-col items-center justify-center gap-y-4">
+                        <div className="flex flex-col items-center gap-y-3">
+                            <div className="flex flex-col items-center gap-y-1">
+                                <Text size="small" leading="compact" weight="plus">No presets</Text>
+                                <Text size="small" leading="compact" className="text-ui-fg-subtle">Create a preset or save an existing option's configuration.</Text>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <DataTable instance={table}>

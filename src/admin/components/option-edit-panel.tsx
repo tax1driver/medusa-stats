@@ -10,14 +10,22 @@ import { Plus } from "@medusajs/icons"
 import { HexColorPicker } from "react-colorful"
 import { useQuery } from "@tanstack/react-query"
 import { STATISTICS_QUERY } from "../lib/queries"
-import { getProviderStatistics } from "../lib/statistics/api"
-import type { StatisticsOption, AvailableStatistic, ParameterFieldDefinition, SeriesVisualizationConfig, InputDependency } from "../lib/statistics/api"
+import { getProviderStatistics, getChartTypes } from "../lib/statistics/api"
+import type { StatisticsOption, AvailableStatistic, SeriesVisualizationConfig, InputDependency } from "../lib/statistics/api"
+// import { LayoutComposer } from "@medusajs/dashboard/components"
+import { ChartConfigProvider } from "../lib/chart-config-context"
+
+interface ParameterField { name: string; type: string; metadata: Record<string, any> }
 import { DependencyInputEditor } from "./dependency-input-editor"
-import { useEffect, useMemo, useState } from "react"
+import { ParameterInput } from "./parameter-input"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 const chartStyles = {
     defaultColor: "#3b82f6"
 }
+
+const BUILT_IN_CHART_TYPES = ["2d", "aggregate", "list"];
 
 const PRESET_SERIES_COLORS = [
     "hsl(210, 85%, 60%)",
@@ -37,16 +45,16 @@ const StatParameterInput = ({
     onChange,
     inputDependencies = [],
 }: {
-    field: ParameterFieldDefinition
+    field: ParameterField
     value: any
     onChange: (value: any) => void
     inputDependencies?: InputDependency[]
 }) => {
     return (
         <div>
-            <Label htmlFor={field.name}>{field.label}</Label>
-            {field.description && (
-                <Text className="text-ui-fg-subtle text-xs mt-0.5 mb-1">{field.description}</Text>
+            <Label htmlFor={field.name}>{field.metadata.label || field.name}</Label>
+            {field.metadata.description && (
+                <Text className="text-ui-fg-subtle text-xs mt-0.5 mb-1">{field.metadata.description}</Text>
             )}
             <Select
                 value={value ?? ""}
@@ -57,7 +65,7 @@ const StatParameterInput = ({
                     <Select.Value placeholder={
                         inputDependencies.length === 0
                             ? "No dependencies available"
-                            : field.placeholder || `Select ${field.label}`
+                            : field.metadata.placeholder || `Select ${field.metadata.label || field.name}`
                     } />
                 </Select.Trigger>
                 <Select.Content>
@@ -78,92 +86,6 @@ const StatParameterInput = ({
 }
 
 
-const ParameterInput = ({
-    field,
-    value,
-    onChange,
-}: {
-    field: ParameterFieldDefinition
-    value: any
-    onChange: (value: any) => void
-}) => {
-    if (field.fieldType === "boolean") {
-        return (
-            <div className="flex items-center justify-between">
-                <div className="flex-1">
-                    <Label htmlFor={field.name}>{field.label}</Label>
-                    {field.description && (
-                        <Text className="text-ui-fg-subtle text-xs mt-0.5">{field.description}</Text>
-                    )}
-                </div>
-                <Switch
-                    id={field.name}
-                    checked={value === true}
-                    onCheckedChange={onChange}
-                />
-            </div>
-        )
-    }
-
-    if (field.fieldType === "select") {
-        return (
-            <div>
-                <Label htmlFor={field.name}>{field.label}</Label>
-                {field.description && (
-                    <Text className="text-ui-fg-subtle text-xs mt-0.5 mb-1">{field.description}</Text>
-                )}
-                <Select value={value ?? ""} onValueChange={onChange}>
-                    <Select.Trigger id={field.name}>
-                        <Select.Value placeholder={field.placeholder || `Select ${field.label}`} />
-                    </Select.Trigger>
-                    <Select.Content>
-                        {field.options?.map((option) => (
-                            <Select.Item key={String(option.value)} value={String(option.value)}>
-                                {option.label}
-                            </Select.Item>
-                        ))}
-                    </Select.Content>
-                </Select>
-            </div>
-        )
-    }
-
-    if (field.fieldType === "number") {
-        return (
-            <div>
-                <Label htmlFor={field.name}>{field.label}</Label>
-                {field.description && (
-                    <Text className="text-ui-fg-subtle text-xs mt-0.5 mb-1">{field.description}</Text>
-                )}
-                <Input
-                    id={field.name}
-                    type="number"
-                    placeholder={field.placeholder}
-                    value={value ?? ""}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
-                />
-            </div>
-        )
-    }
-
-
-    return (
-        <div>
-            <Label htmlFor={field.name}>{field.label}</Label>
-            {field.description && (
-                <Text className="text-ui-fg-subtle text-xs mt-0.5 mb-1">{field.description}</Text>
-            )}
-            <Input
-                id={field.name}
-                type="text"
-                placeholder={field.placeholder}
-                value={value ?? ""}
-                onChange={(e) => onChange(e.target.value || null)}
-            />
-        </div>
-    )
-}
-
 export type OptionEditPanelProps = {
     option: StatisticsOption
     editedData: Record<string, any>
@@ -182,17 +104,6 @@ export type OptionEditPanelProps = {
     context?: "chart" | "preset" | "dependency"
 }
 
-/**
- * Option Edit Panel - Reusable form component for editing statistic options
- * 
- * This component displays the form fields for editing an option's:
- * - Display name
- * - Parameters
- * - Visualization options (optional, controlled by showVisualizationOptions)
- * - Cache options (optional, controlled by showCacheOptions)
- * 
- * The parent context (Chart, Preset, etc.) should handle the sidebar and overall layout.
- */
 export const OptionEditPanel = ({
     option,
     editedData,
@@ -211,7 +122,13 @@ export const OptionEditPanel = ({
     context = "chart",
 }: OptionEditPanelProps) => {
     const [showCustomColorPicker, setShowCustomColorPicker] = useState(false)
+    const { t } = useTranslation("stats")
 
+    const { data: chartTypes } = useQuery({
+        queryKey: [STATISTICS_QUERY, "chart-types"],
+        queryFn: getChartTypes,
+        staleTime: 5 * 60 * 1000,
+    })
 
     const { data: providerStats, isLoading: isLoadingFields } = useQuery({
         queryKey: [STATISTICS_QUERY, "providers", option.provider_id || option.provider?.id, "statistics"],
@@ -223,8 +140,20 @@ export const OptionEditPanel = ({
     )
 
     const hasStatParameters = useMemo(() => {
-        return statisticDef?.parameters.fields.some((field: ParameterFieldDefinition) => field.fieldType === "stat")
+        return statisticDef?.parameters.some((field: ParameterField) => field.type === "stat")
     }, [statisticDef]);
+
+    const availableChartTypes = chartTypes || BUILT_IN_CHART_TYPES
+
+    const handleChartTypeChange = useCallback(
+        (val: string) => {
+            onVisualizationChange?.({
+                ...editedVisualization,
+                chartType: val || undefined,
+            })
+        },
+        [editedVisualization, onVisualizationChange],
+    )
 
     const currentColor = editedVisualization.color || chartStyles.defaultColor
     const isPresetColor = PRESET_SERIES_COLORS.some((color) => color.toLowerCase() === currentColor.toLowerCase())
@@ -289,7 +218,7 @@ export const OptionEditPanel = ({
 
                 {!isLoadingFields && statisticDef && (
                     <>
-                        {statisticDef.parameters.fields.length === 0 ? (
+                        {statisticDef.parameters.length === 0 ? (
                             <div className="text-center py-8">
                                 <Text className="text-ui-fg-muted">
                                     This statistic has no configurable parameters
@@ -297,9 +226,9 @@ export const OptionEditPanel = ({
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {statisticDef.parameters.fields.map((field: ParameterFieldDefinition) => {
+                                {statisticDef.parameters.map((field: ParameterField) => {
 
-                                    if (field.fieldType === "stat") {
+                                    if (field.type === "stat") {
 
                                         const mappedDep = editedDependencies.find(dep => dep.parameter_name === field.name)
                                         const currentValue = mappedDep?.input_option_id || ""
@@ -343,6 +272,7 @@ export const OptionEditPanel = ({
                                                     [field.name]: newValue
                                                 })
                                             }}
+                                            statContext={{ provider_id: option.provider?.id || option.provider_id, stat_id: option.provider_option_name }}
                                         />
                                     )
                                 })}
@@ -470,19 +400,61 @@ export const OptionEditPanel = ({
                             <Label htmlFor="series_chart_type">Chart Type</Label>
                             <Select
                                 value={editedVisualization.chartType || ""}
-                                onValueChange={(val) => onVisualizationChange({ ...editedVisualization, chartType: val === "default" ? undefined : val as any })}
+                                onValueChange={handleChartTypeChange}
                             >
                                 <Select.Trigger id="series_chart_type">
                                     <Select.Value placeholder="Use default" />
                                 </Select.Trigger>
                                 <Select.Content>
-                                    <Select.Item value="default">Use default</Select.Item>
-                                    <Select.Item value="line">Line</Select.Item>
-                                    <Select.Item value="bar">Bar</Select.Item>
-                                    <Select.Item value="area">Area</Select.Item>
+                                    <Select.Item value="_default_">Use default</Select.Item>
+                                    {availableChartTypes.map((type) => (
+                                        <Select.Item key={type} value={type}>
+                                            {t(`chart_types.${type}`, type)}
+                                        </Select.Item>
+                                    ))}
                                 </Select.Content>
                             </Select>
                         </div>
+                        {(editedVisualization.chartType === "2d" || !editedVisualization.chartType) && (
+                            <div>
+                                <Label htmlFor="series_series_type">Series Style</Label>
+                                <Select
+                                    value={editedVisualization.seriesType || ""}
+                                    onValueChange={(val) => onVisualizationChange({ ...editedVisualization, seriesType: val === "_default_" ? undefined : val as any })}
+                                >
+                                    <Select.Trigger id="series_series_type">
+                                        <Select.Value placeholder="Line (default)" />
+                                    </Select.Trigger>
+                                    <Select.Content>
+                                        <Select.Item value="default">Line (default)</Select.Item>
+                                        <Select.Item value="line">Line</Select.Item>
+                                        <Select.Item value="bar">Bar</Select.Item>
+                                        <Select.Item value="area">Area</Select.Item>
+                                    </Select.Content>
+                                </Select>
+                            </div>
+                        )}
+                        {editedVisualization.chartType &&
+                            !BUILT_IN_CHART_TYPES.includes(editedVisualization.chartType) && (
+                                <ChartConfigProvider
+                                    config={editedVisualization}
+                                    onChange={(patch) =>
+                                        onVisualizationChange({
+                                            ...editedVisualization,
+                                            ...patch,
+                                        })
+                                    }
+                                >
+                                    <></>
+                                    {/* TODO: figure out why LayoutComposer crashes because of useExtension's provider not being present apparently (?) */}
+                                    {/* <LayoutComposer
+                                        widgetsZonePrefix={`statistics.chart-config.${editedVisualization.chartType}`}
+                                        preferredLayoutId="core:single-column"
+                                        data={{}}
+                                        sections={{ main: <></> }}
+                                    /> */}
+                                </ChartConfigProvider>
+                            )}
 
                         <div className="flex items-center justify-between">
                             <div>
@@ -497,6 +469,53 @@ export const OptionEditPanel = ({
                                 onCheckedChange={(checked) => onVisualizationChange({ ...editedVisualization, visible: checked })}
                             />
                         </div>
+
+                        {(editedVisualization.chartType === "list" || editedVisualization.chartType === "aggregate") && (
+                            <>
+                                {editedVisualization.chartType === "list" && (
+                                    <>
+                                        <div>
+                                            <Label htmlFor="list_page_size">Rows per page</Label>
+                                            <Select
+                                                value={String(editedVisualization.pageSize || 10)}
+                                                onValueChange={(val) => onVisualizationChange({ ...editedVisualization, pageSize: Number(val) })}
+                                            >
+                                                <Select.Trigger id="list_page_size">
+                                                    <Select.Value />
+                                                </Select.Trigger>
+                                                <Select.Content>
+                                                    {[5, 10, 20, 50, 100].map((n) => (
+                                                        <Select.Item key={n} value={String(n)}>
+                                                            {n}
+                                                        </Select.Item>
+                                                    ))}
+                                                </Select.Content>
+                                            </Select>
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor="list_aggregate">Aggregate function</Label>
+                                            <Select
+                                                value={editedVisualization.aggregate || "_default_"}
+                                                onValueChange={(val) => onVisualizationChange({ ...editedVisualization, aggregate: val === "_default_" ? undefined : val })}
+                                            >
+                                                <Select.Trigger id="list_aggregate">
+                                                    <Select.Value placeholder="None" />
+                                                </Select.Trigger>
+                                                <Select.Content>
+                                                    <Select.Item value="_default_">None</Select.Item>
+                                                    <Select.Item value="sum">Sum</Select.Item>
+                                                    <Select.Item value="avg">Average</Select.Item>
+                                                    <Select.Item value="min">Min</Select.Item>
+                                                    <Select.Item value="max">Max</Select.Item>
+                                                    <Select.Item value="count">Count</Select.Item>
+                                                </Select.Content>
+                                            </Select>
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -582,3 +601,4 @@ export const OptionEditPanel = ({
         </div>
     )
 }
+

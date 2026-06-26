@@ -33,7 +33,6 @@ export const calculateViewWorkflow = createWorkflow(
         return new WorkflowResponse({
             results: calculationResult.results,
             errors: calculationResult.errors,
-            definitions: calculationResult.definitions,
             metadata: calculationResult.metadata,
             duration: calculationResult.duration,
         });

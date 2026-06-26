@@ -60,10 +60,7 @@ export async function POST(
     res.json({ alert });
 }
 
-/**
- * DELETE /admin/statistics/alerts/:id
- * Delete an alert
- */
+
 export async function DELETE(
     req: MedusaRequest,
     res: MedusaResponse

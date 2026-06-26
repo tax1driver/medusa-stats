@@ -2,9 +2,6 @@ import StatisticsService from "../../../modules/statistics/service";
 import { buildDependencyOptionMap } from "../../../modules/statistics/utils/dependency-option-map";
 import { MedusaError } from "@medusajs/framework/utils";
 
-/**
- * Represents a node in the dependency graph
- */
 export interface DependencyNode {
     id: string;
     name: string;
@@ -14,9 +11,6 @@ export interface DependencyNode {
     depth: number;
 }
 
-/**
- * Result of dependency resolution
- */
 export interface DependencyResolution {
     calculationOrder: string[];
     dependencyTree: DependencyNode;
@@ -24,13 +18,7 @@ export interface DependencyResolution {
     cycleNodes?: string[];
 }
 
-/**
- * Utility class for dependency graph operations
- */
 export class DependencyGraphUtils {
-    /**
-     * Build complete dependency tree for an option
-     */
     static async buildDependencyTree(
         optionId: string,
         statisticsService: StatisticsService,
@@ -105,10 +93,6 @@ export class DependencyGraphUtils {
         return buildNode(optionId, depth, new Set(visited));
     }
 
-    /**
-     * Get calculation order using topological sort
-     * Dependencies must be calculated before their dependents
-     */
     static getCalculationOrder(tree: DependencyNode): string[] {
         const order: string[] = [];
         const visited = new Set<string>();
@@ -132,9 +116,6 @@ export class DependencyGraphUtils {
         return order;
     }
 
-    /**
-     * Detect circular dependencies in the graph
-     */
     static detectCycles(
         optionId: string,
         allDependencies: Map<string, string[]>,
@@ -161,10 +142,6 @@ export class DependencyGraphUtils {
         return null;
     }
 
-    /**
-     * Validate dependency integrity
-     * Checks for cycles and validates all dependencies exist
-     */
     static async validateDependencies(
         optionId: string,
         statisticsService: StatisticsService
@@ -188,9 +165,6 @@ export class DependencyGraphUtils {
         };
     }
 
-    /**
-     * Flatten dependency tree to list of all option IDs
-     */
     static flattenTree(tree: DependencyNode): string[] {
         const ids = new Set<string>();
 

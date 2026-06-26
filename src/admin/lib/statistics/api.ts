@@ -12,7 +12,8 @@ export type StatisticsProvider = {
 
 
 export type SeriesVisualizationConfig = {
-    chartType?: "line" | "bar" | "area" | "pie"
+    chartType?: string
+    seriesType?: "line" | "bar" | "area"
     color?: string
     lineStyle?: "solid" | "dashed" | "dotted"
     lineWidth?: number
@@ -163,74 +164,13 @@ export type StatisticsAlertLog = {
     alert?: StatisticsAlert
 }
 
-export type ParameterFieldType =
-    | "text"
-    | "number"
-    | "select"
-    | "multiselect"
-    | "boolean"
-    | "date"
-    | "daterange"
-    | "currency"
-    | "json"
-    | "entity"
-    | "entities"
-    | "stat"
-    | "custom"
-
-export type EntityReference = {
-    entity: string
-}
-
-export type ParameterFieldDefinition = {
-    name: string
-    label: string
-    description?: string
-    placeholder?: string
-    fieldType: ParameterFieldType
-
-    options?: Array<{
-        value: string | number | boolean
-        label: string
-        description?: string
-        disabled?: boolean
-    }>
-
-    entityReference?: EntityReference
-
-    dependsOn?: Array<{
-        field: string
-        condition?: (value: any, allValues: Record<string, any>) => boolean
-        effect?: "show" | "hide" | "enable" | "disable" | "require"
-    }>
-}
-
 export type AvailableStatistic = {
     id: string
-    name: string
-    description?: string
-    category?: string
-    tags?: string[]
-    parameters: {
-        fields: ParameterFieldDefinition[]
-        defaults?: Record<string, any>
-    }
-    display: {
-        type: "currency" | "number" | "percentage" | "count" | "duration" | "text" | "custom"
-        format?: {
-            currency?: string
-            decimals?: number
-            prefix?: string
-            suffix?: string
-            locale?: string
-            notation?: "standard" | "compact" | "scientific" | "engineering"
-        }
-        visualization?: {
-            preferredChartType?: "line" | "bar" | "area" | "pie" | "gauge" | "number"
-            xAxisType?: "time" | "category"
-            icon?: string
-        }
-    }
+    parameters: Array<{
+        name: string
+        type: string
+        metadata: Record<string, any>
+    }>
     metadata?: Record<string, any>
 }
 
@@ -409,6 +349,12 @@ export const updateOption = async (id: string, data: {
     return response.option
 }
 
+export const deleteOption = async (id: string): Promise<void> => {
+    await sdk.client.fetch(`/admin/statistics/options/${id}`, {
+        method: "DELETE",
+    })
+}
+
 
 
 export const listCharts = async (params?: { view_id?: string; limit?: number; offset?: number }) => {
@@ -515,7 +461,7 @@ export const getProviderStatistics = async (id: string, params?: { sales_channel
     return response
 }
 
-export const getAllProviderStatistics = async (params?: { provider_id?: string; sales_channel_id?: string }): Promise<{ statistics: (AvailableStatistic & { provider_id: string; provider_name: string })[] }> => {
+export const getAllProviderStatistics = async (params?: { provider_id?: string; sales_channel_id?: string }): Promise<{ statistics: (AvailableStatistic & { provider_id: string })[] }> => {
     const response = await sdk.client.fetch<{ statistics: (AvailableStatistic & { provider_id: string; provider: StatisticsProvider })[] }>(`/admin/statistics/providers/${params?.provider_id || "all"}/statistics`, {
         query: params ? { sales_channel_id: params.sales_channel_id } : undefined
     })
@@ -619,13 +565,31 @@ export const getAlertLog = async (id: string) => {
     return response.log
 }
 
+export const getChartTypes = async (): Promise<string[]> => {
+    const response = await sdk.client.fetch<{ chart_types: string[] }>(
+        "/admin/statistics/chart-types",
+    )
+    return response.chart_types
+}
 
 
+export const calculateStatistics = async (data: {
+    statistics: Array<{
+        provider_id: string
+        key: string
+        params?: Record<string, any>
+    }>
+    periodStart: string
+    periodEnd: string
+    interval: number
+}): Promise<{ results: Record<string, { value?: any; error?: string; metadata?: Record<string, any> }> }> => {
+    return sdk.client.fetch("/admin/statistics/calculate", {
+        method: "POST",
+        body: data,
+    })
+}
 
 
-/**
- * Clone a statistics option with customizations
- */
 export const cloneOption = async (
     sourceId: string,
     data: {
@@ -644,9 +608,6 @@ export const cloneOption = async (
     return response.option
 }
 
-/**
- * Update a statistics option (including composite fields)
- */
 export const updateOptionWithCompositeFields = async (
     id: string,
     data: Partial<{

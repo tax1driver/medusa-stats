@@ -1,6 +1,7 @@
 import { Drawer, Button, Text, Badge, Input, Label } from "@medusajs/ui"
 import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { STATISTICS_QUERY } from "../lib/queries"
 import { getAllProviderStatistics, StatisticsProvider, type AvailableStatistic } from "../lib/statistics/api"
 
@@ -16,10 +17,6 @@ type OptionSelectorProps = {
     enabled?: boolean
 }
 
-/**
- * Reusable selector for choosing an available statistic from providers.
- * Can be embedded in another drawer/modal, or wrapped with OptionSelectorDrawer.
- */
 export const OptionSelector = ({
     onSelect,
     title,
@@ -27,6 +24,7 @@ export const OptionSelector = ({
     excludeStatistics = [],
     enabled = true,
 }: OptionSelectorProps) => {
+    const { t } = useTranslation("stats")
     const [searchQuery, setSearchQuery] = useState("")
 
 
@@ -53,9 +51,8 @@ export const OptionSelector = ({
             if (searchQuery) {
                 const query = searchQuery.toLowerCase()
                 return (
-                    stat.name.toLowerCase().includes(query) ||
-                    stat.description?.toLowerCase().includes(query) ||
-                    stat.provider_name.toLowerCase().includes(query)
+                    stat.provider_name.toLowerCase().includes(query) ||
+                    stat.id.toLowerCase().includes(query)
                 )
             }
 
@@ -78,7 +75,7 @@ export const OptionSelector = ({
         onSelect({
             provider_id: stat.provider_id,
             provider_option_name: stat.id,
-            local_option_name: stat.name,
+            local_option_name: t(`${stat.provider_id}.${stat.id}.name`, stat.id),
         })
     }
 
@@ -129,7 +126,7 @@ export const OptionSelector = ({
                             className="border border-ui-border-base bg-ui-bg-subtle rounded-lg p-4"
                         >
                             <div className="flex items-center justify-between mb-3">
-                                <Badge>{stats[0]?.provider.display_name || providerId}</Badge>
+                                <Badge>{t(`${providerId}.name`, providerId)}</Badge>
                                 <Text className="text-ui-fg-muted text-xs">
                                     {stats.length} available
                                 </Text>
@@ -143,12 +140,12 @@ export const OptionSelector = ({
                                         className="p-3 rounded-lg text-left transition-colors bg-ui-bg-base hover:bg-ui-bg-base-hover"
                                     >
                                         <div className="flex-1">
-                                            <Text className="font-medium text-sm">{stat.name}</Text>
-                                            {stat.description && (
-                                                <Text className="text-ui-fg-subtle text-xs mt-1">
-                                                    {stat.description}
-                                                </Text>
-                                            )}
+                                            <Text className="font-medium text-sm">
+                                                {t(`${stat.provider_id}.${stat.id}.name`, stat.id)}
+                                            </Text>
+                                            <Text className="text-ui-fg-subtle text-xs mt-1">
+                                                {t(`${stat.provider_id}.${stat.id}.description`, "")}
+                                            </Text>
                                         </div>
                                     </button>
                                 ))}
@@ -178,8 +175,8 @@ export const OptionSelectorDrawer = ({
     open,
     onOpenChange,
     onSelect,
-    title = "Select Statistic",
-    description = "Choose a statistic to add",
+    title = "Select data source",
+    description = "Choose a source to add",
     excludeStatistics,
 }: OptionSelectorDrawerProps) => {
     return (

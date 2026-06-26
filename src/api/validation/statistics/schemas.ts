@@ -1,23 +1,14 @@
 import { z } from "zod";
 import { createFindParams } from "@medusajs/medusa/api/utils/validators";
 
-/**
- * Common schemas
- */
-
 export const PaginationSchema = createFindParams({
     limit: 20,
     offset: 0,
 });
 
-
 export const ExpandSchema = z.object({
     fields: z.string().optional(),
 });
-
-/**
- * Provider Validation Schemas
- */
 
 export const ListProvidersQuerySchema = PaginationSchema.extend({
     q: z.string().optional(),
@@ -38,10 +29,6 @@ export const GetProviderStatisticsQuerySchema = z.object({
     sales_channel_id: z.string().optional(),
 });
 
-/**
- * View Validation Schemas
- */
-
 export const ListViewsQuerySchema = PaginationSchema.extend({
     q: z.string().optional(),
     order: z.string().optional(),
@@ -56,16 +43,16 @@ export const ListChartsQuerySchema = PaginationSchema.extend({
 export const CreateViewSchema = z.object({
     name: z.string().min(1, "Name is required"),
     description: z.string().optional().nullable(),
-    stats_data: z.record(z.any()).optional().nullable(),
-    layout_config: z.record(z.any()).optional().nullable(),
+    stats_data: z.record(z.string(), z.any()).optional().nullable(),
+    layout_config: z.record(z.string(), z.any()).optional().nullable(),
     period_type: z.enum(["rolling", "calendar", "custom"]).optional(),
-    period_config: z.record(z.any()).optional().nullable(),
+    period_config: z.record(z.string(), z.any()).optional().nullable(),
     interval: z.number().optional(),
     options: z.array(
         z.object({
             provider_id: z.string().min(1, "Provider ID is required"),
             statistic_key: z.string().min(1, "Statistic key is required"),
-            data: z.record(z.any()).optional().nullable(),
+            data: z.record(z.string(), z.any()).optional().nullable(),
         })
     ).optional(),
 });
@@ -73,10 +60,10 @@ export const CreateViewSchema = z.object({
 export const UpdateViewSchema = z.object({
     name: z.string().min(1).optional(),
     description: z.string().optional().nullable(),
-    stats_data: z.record(z.any()).optional().nullable(),
-    layout_config: z.record(z.any()).optional().nullable(),
+    stats_data: z.record(z.string(), z.any()).optional().nullable(),
+    layout_config: z.record(z.string(), z.any()).optional().nullable(),
     period_type: z.enum(["rolling", "calendar", "custom"]).optional(),
-    period_config: z.record(z.any()).optional().nullable(),
+    period_config: z.record(z.string(), z.any()).optional().nullable(),
     interval: z.number().optional(),
     cache_options: z.object({
         enabled: z.boolean().optional(),
@@ -97,20 +84,16 @@ export const CloneViewSchema = z.object({
     include_options: z.boolean().optional(),
 });
 
-/**
- * Option Validation Schemas
- */
-
-
 export const InputDependencySchema = z.object({
     input_option_id: z.string().min(1, "Input option ID is required"),
     parameter_name: z.string().min(1, "Parameter name is required").nullable(),
     order: z.number().int().optional(),
-    metadata: z.record(z.any()).optional().nullable(),
+    metadata: z.record(z.string(), z.any()).optional().nullable(),
 });
 
 
 export const ParameterConfigSchema = z.record(
+    z.string(),
     z.object({
         value: z.any(),
         locked: z.boolean().default(false),
@@ -145,7 +128,7 @@ export const CreateOptionSchema = z.object({
     view_id: z.string().min(1, "View ID is required").optional(),
     provider_id: z.string().min(1, "Provider ID is required"),
     provider_option_name: z.string().min(1, "Provider option name is required"),
-    data: z.record(z.any()).optional().nullable(),
+    data: z.record(z.string(), z.any()).optional().nullable(),
     local_option_name: z.string().optional(),
 
     parameter_config: ParameterConfigSchema.optional().nullable(),
@@ -154,9 +137,9 @@ export const CreateOptionSchema = z.object({
 });
 
 export const UpdateOptionSchema = z.object({
-    data: z.record(z.any()).optional().nullable(),
+    data: z.record(z.string(), z.any()).optional().nullable(),
     local_option_name: z.string().min(1).optional(),
-    visualization_config: z.record(z.any()).optional().nullable(),
+    visualization_config: z.record(z.string(), z.any()).optional().nullable(),
     cache_options: z.object({
         enabled: z.boolean().optional(),
         ttl: z.number().optional(),
@@ -182,21 +165,12 @@ export const CalculateOptionSchema = z.object({
     periodEnd: z.string().datetime("Invalid end date"),
     interval: z.number(),
     onlyCompleteData: z.boolean().optional(),
-    parameters: z.record(z.any()).optional().nullable(),
+    parameters: z.record(z.string(), z.any()).optional().nullable(),
     cache_options_override: z.object({
         enabled: z.boolean().optional(),
         ttl: z.number().optional(),
     }).optional().nullable(),
 });
-
-/**
- * Snapshot Validation Schemas
- */
-
-
-/**
- * Alert Validation Schemas
- */
 
 export const ListAlertsQuerySchema = PaginationSchema.extend({
     option_id: z.string().optional(),
@@ -240,7 +214,7 @@ export const CreateAlertSchema = z.object({
     severity: z.enum(["info", "warning", "error"]),
     is_enabled: z.boolean().optional(),
     user_ids: z.array(z.string()).optional(),
-    metadata: z.record(z.any()).optional(),
+    metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export const UpdateAlertSchema = z.object({
@@ -268,7 +242,7 @@ export const UpdateAlertSchema = z.object({
     interval: z.number().positive().optional(),
     severity: z.enum(["info", "warning", "error"]).optional(),
     is_enabled: z.boolean().optional(),
-    metadata: z.record(z.any()).optional(),
+    metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export const GetAlertQuerySchema = ExpandSchema;
@@ -276,10 +250,6 @@ export const GetAlertQuerySchema = ExpandSchema;
 export const ListAlertLogsQuerySchema = PaginationSchema.extend({
     order: z.string().optional(),
 });
-
-/**
- * Alert Log Validation Schemas
- */
 
 export const ListAlertLogsGlobalQuerySchema = PaginationSchema.extend({
     alert_id: z.string().optional(),
@@ -289,10 +259,6 @@ export const ListAlertLogsGlobalQuerySchema = PaginationSchema.extend({
 
 export const GetAlertLogQuerySchema = ExpandSchema;
 
-/**
- * Cache Validation Schemas
- */
-
 export const InvalidateCacheSchema = z.object({
 
     view_id: z.string().optional(),
@@ -301,7 +267,7 @@ export const InvalidateCacheSchema = z.object({
 
     options: z.array(z.object({
         option_id: z.string(),
-        parameters: z.record(z.any())
+        parameters: z.record(z.string(), z.any())
     })).optional(),
 
 
@@ -310,7 +276,7 @@ export const InvalidateCacheSchema = z.object({
     interval: z.number().int().positive(),
 
 
-    parameters: z.record(z.any()).optional(),
+    parameters: z.record(z.string(), z.any()).optional(),
 }).refine(
     (data) => {
 
@@ -356,16 +322,12 @@ export type GetAlertLogQuery = z.infer<typeof GetAlertLogQuerySchema>;
 
 export type InvalidateCacheInput = z.infer<typeof InvalidateCacheSchema>;
 
-/**
- * Chart Validation Schemas
- */
-
 export const CreateChartSchema = z.object({
     name: z.string().min(1, "Name is required"),
     description: z.string().default(""),
-    visualization_config: z.record(z.any()).default({}),
-    layout: z.record(z.any()).default({}),
-    metadata: z.record(z.any()).default({}),
+    visualization_config: z.record(z.string(), z.any()).default({}),
+    layout: z.record(z.string(), z.any()).default({}),
+    metadata: z.record(z.string(), z.any()).default({}),
     statistic_ids: z.array(z.string()).optional(),
     view_id: z.string()
 });
@@ -373,9 +335,9 @@ export const CreateChartSchema = z.object({
 export const UpdateChartSchema = z.object({
     name: z.string().min(1).optional(),
     description: z.string().optional().nullable(),
-    visualization_config: z.record(z.any()).optional().nullable(),
-    layout: z.record(z.any()).optional().nullable(),
-    metadata: z.record(z.any()).optional().nullable(),
+    visualization_config: z.record(z.string(), z.any()).optional().nullable(),
+    layout: z.record(z.string(), z.any()).optional().nullable(),
+    metadata: z.record(z.string(), z.any()).optional().nullable(),
 });
 
 export const ManageChartStatisticsSchema = z.object({

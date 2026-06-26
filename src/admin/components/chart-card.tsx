@@ -15,7 +15,7 @@ import {
     ChartBar,
 } from "@medusajs/icons"
 import type { InputDependency, StatisticsChart, StatisticsOption } from "../lib/statistics/api"
-import { ComboChart } from "./combo-chart"
+import { StatsChart } from "./combo-chart"
 import { OptionEditDrawer } from "./option-edit-drawer"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { STATISTICS_QUERY } from "../lib/queries"
@@ -53,7 +53,7 @@ export const ChartCard = ({
     const statisticsWithResults = (chart.statistics || []).map((stat: StatisticsOption) => ({
         ...stat,
         result: results?.[stat.id],
-        definition: definitions?.[stat.provider_id]?.find((v) => v.id === stat.provider_option_name),
+        definition: definitions?.[stat.provider_id]?.find((v: any) => v.id === stat.provider_option_name),
     }));
 
 
@@ -177,7 +177,7 @@ export const ChartCard = ({
 
                 {!isCalculating && !allErrors && statisticsWithResults.length > 0 && (
                     <div className="mt-4">
-                        <ComboChart
+                        <StatsChart
                             statistics={statisticsWithResults}
                             chartConfig={chart.visualization_config}
                             interval={interval}

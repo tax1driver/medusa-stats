@@ -49,7 +49,7 @@ export async function GET(
     const providersWithAvailableStats = await Promise.all(providers.map(async (provider) => {
         try {
             const providerInstance = statisticsService.getProvider(provider.id, query as Query);
-            const availableStats = await providerInstance.getAvailableStatistics();
+            const availableStats = providerInstance.listStatistics();
 
             return {
                 ...provider,

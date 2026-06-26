@@ -27,6 +27,8 @@ import { CreateAlertModal } from "../../../components/create-alert-modal"
 import { formatDuration, intervalToDuration } from "date-fns"
 import { useNavigate } from "react-router-dom"
 import { Skeleton } from "../../../components/skeleton"
+import { useTranslation } from "react-i18next"
+
 
 const columnHelper = createDataTableColumnHelper<StatisticsAlert>()
 
@@ -36,6 +38,8 @@ const getColumns = (onEdit: (alertId: string) => void) => [
         enableSorting: true,
         sortLabel: "Name",
         cell: ({ row }) => {
+
+
             if ((row.original as any).isLoading) {
                 return (
                     <div>
@@ -77,24 +81,17 @@ const getColumns = (onEdit: (alertId: string) => void) => [
             )
         },
     }),
-    columnHelper.accessor("option.local_option_name", {
-        header: "Related Statistic",
+    columnHelper.accessor("option.provider.id", {
+        header: "Source",
         cell: ({ getValue, row }) => {
-            if ((row.original as any).isLoading) {
-                return <Skeleton className="h-5 w-32" />
-            }
-            return getValue() || "-"
-        }
-    }),
-    columnHelper.accessor("option.provider.display_name", {
-        header: "Root Provider",
-        cell: ({ getValue, row }) => {
+            const { t } = useTranslation("stats");
+
             if ((row.original as any).isLoading) {
                 return <Skeleton className="h-5 w-32" />
             }
             return (
                 <Badge size="small" color="grey">
-                    {getValue() || "-"}
+                    {getValue() ? t(`sp_${getValue()}.name`, getValue()) : "Unknown"}
                 </Badge>
             )
         }

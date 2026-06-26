@@ -1,6 +1,9 @@
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
-import { MedusaError } from "@medusajs/framework/utils";
-import { resolveStatisticDefinition, validateParameterData } from "../utils/parameter-utils";
+import { STATISTICS_MODULE } from "../../../modules/statistics";
+import StatisticsService from "../../../modules/statistics/service";
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils";
+import { Query } from "@medusajs/framework";
+import { z } from "zod";
 
 export interface ValidateOptionParametersInput {
     options: Array<{
@@ -9,17 +12,18 @@ export interface ValidateOptionParametersInput {
         data: Record<string, any>;
         provider_id: string;
     }>;
-    availableStatistics: Record<string, any[]>;
     partialValidation?: boolean;
     throwOnError?: boolean;
 }
 
 export const validateOptionParametersStep = createStep(
     "validate-option-parameters",
-    async (input: ValidateOptionParametersInput) => {
+    async (input: ValidateOptionParametersInput, { container }) => {
+        const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
+        const query = container.resolve<Query>(ContainerRegistrationKeys.QUERY);
+
         const {
             options,
-            availableStatistics,
             partialValidation = true,
             throwOnError = true,
         } = input;
@@ -33,15 +37,20 @@ export const validateOptionParametersStep = createStep(
             statDefinition?: any;
         }> = [];
 
-        for (const option of options) {
-            const { statDefinition, error } = resolveStatisticDefinition(
-                availableStatistics,
-                option.provider_id,
-                option.provider_option_name
-            );
+        const providerCache = new Map<string, any>();
 
-            if (!statDefinition || error) {
-                const providerError = error ?? "Invalid option configuration";
+        for (const option of options) {
+            let providerInstance = providerCache.get(option.provider_id);
+            if (!providerInstance) {
+                providerInstance = statisticsService.getProvider(option.provider_id, query);
+                providerCache.set(option.provider_id, providerInstance);
+            }
+
+            const stats = providerInstance.listStatistics();
+            const statDefinition = stats.find(s => s.id === option.provider_option_name);
+
+            if (!statDefinition) {
+                const providerError = `Statistic ${option.provider_option_name} not found in provider ${option.provider_id}`;
 
                 validationResults.push({
                     option,
@@ -57,28 +66,41 @@ export const validateOptionParametersStep = createStep(
                 continue;
             }
 
-            const validation = validateParameterData(
-                option.data || {},
-                statDefinition.parameters.fields,
-                { partial: partialValidation }
-            );
+            const errors: string[] = [];
+            let isComplete = true;
+
+            try {
+                providerInstance.validateParameters(
+                    option.provider_option_name,
+                    option.data || {},
+                    partialValidation
+                );
+            } catch (error) {
+                if (error instanceof z.ZodError) {
+                    errors.push(...error.issues.map(e => `${e.path.join(".")}: ${e.message}`));
+                    isComplete = !error.issues.some(e => e.code === "invalid_type");
+                } else {
+                    errors.push("Unknown validation error");
+                    isComplete = false;
+                }
+            }
 
             validationResults.push({
                 option,
-                isValid: validation.isValid,
-                errors: validation.errors,
-                isComplete: validation.isComplete,
+                isValid: errors.length === 0,
+                errors,
+                isComplete,
                 statDefinition,
             });
 
-            if (!validation.isValid && throwOnError) {
+            if (errors.length > 0 && throwOnError) {
                 throw new MedusaError(
                     MedusaError.Types.INVALID_DATA,
-                    `Invalid parameters for option ${option.local_option_name}: ${validation.errors.join(", ")}`
+                    `Invalid parameters for option ${option.local_option_name}: ${errors.join(", ")}`
                 );
             }
 
-            if (validation.isValid) {
+            if (errors.length === 0) {
                 validatedOptions.push(option);
             }
         }

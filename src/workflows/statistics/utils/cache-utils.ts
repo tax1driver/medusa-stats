@@ -1,16 +1,9 @@
-/**
- * Configuration for statistics cache
- */
 export const STATISTICS_CACHE_CONFIG = {
 
     DEFAULT_TTL: 300,
     KEY_PREFIX: "stats:",
 } as const;
 
-/**
- * Generates cache key data for a single statistic calculation
- * To be used with cacheService.computeKey()
- */
 export function getStatisticCacheKeyData(params: {
     option_id: string;
     periodStart: Date;
@@ -31,10 +24,6 @@ export function getStatisticCacheKeyData(params: {
     };
 }
 
-/**
- * Helper to build cache key for a statistic option
- * Uses cacheService.computeKey internally
- */
 export async function generateStatisticCacheKey(
     cacheService: any,
     params: {
@@ -49,11 +38,6 @@ export async function generateStatisticCacheKey(
     return cacheService.computeKey(keyData);
 }
 
-/**
- * Check if caching is enabled for an option
- * Checks both option-level and view-level cache_options
- * If cache_options is not set or enabled is not specified, caching is enabled by default
- */
 export function isCachingEnabled(
     optionCacheOptions?: { enabled?: boolean; ttl?: number } | null,
     viewCacheOptions?: { enabled?: boolean; ttl?: number } | null
@@ -72,10 +56,6 @@ export function isCachingEnabled(
     return true;
 }
 
-/**
- * Determine effective TTL for a statistic calculation
- * Priority: option.cache_options.ttl > view.cache_options.ttl > default TTL
- */
 export function getEffectiveCacheTTL(
     optionCacheOptions?: { enabled?: boolean; ttl?: number } | null,
     viewCacheOptions?: { enabled?: boolean; ttl?: number } | null

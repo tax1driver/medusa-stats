@@ -26,15 +26,18 @@ import {
     type AvailableStatistic,
     type StatisticsOption,
     type StatisticsAlert,
-    type ParameterFieldDefinition,
 } from "../lib/statistics/api"
+
+
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { ChevronDownMini, ChevronUpMini, Adjustments as AdjustmentsHorizontal } from "@medusajs/icons"
 import { ParameterInput } from "./parameter-input"
+import { useTranslation } from "react-i18next"
 
 type IntervalUnit = "seconds" | "minutes" | "hours" | "days" | "weeks"
+interface ParameterField { name: string; type: string; metadata: Record<string, any> }
 
 const INTERVAL_UNIT_SECONDS: Record<IntervalUnit, number> = {
     seconds: 1,
@@ -75,7 +78,7 @@ const alertSchema = z.object({
     provider_id: z.string().optional(),
     statistic_id: z.string().optional(),
     preset_option_id: z.string().optional(),
-    parameters: z.record(z.any()),
+    parameters: z.record(z.any(), z.any()),
     operator: z.enum(["gt", "lt", "gte", "lte", "eq", "neq", "between"]),
     threshold: z.union([z.number(), z.tuple([z.number(), z.number()])]),
     comparison_type: z.enum(["absolute", "relative"]),
@@ -98,6 +101,7 @@ interface ProviderSelectionProps {
 }
 
 const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProps) => {
+    const { t } = useTranslation("stats")
     const [expandedProvider, setExpandedProvider] = useState<string | null>(null)
 
     const selectedProviderId = form.watch("provider_id")
@@ -112,29 +116,18 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
     const handleSelectStatistic = (providerId: string, statistic: AvailableStatistic) => {
         form.setValue("provider_id", providerId)
         form.setValue("statistic_id", statistic.id)
-
-
-        const defaultParams: Record<string, any> = {}
-        if (statistic.parameters?.fields) {
-            statistic.parameters.fields.forEach((field: ParameterFieldDefinition) => {
-                if (statistic.parameters.defaults?.[field.name] !== undefined) {
-                    defaultParams[field.name] = statistic.parameters.defaults[field.name]
-                }
-            })
-        }
-        form.setValue("parameters", defaultParams)
+        form.setValue("parameters", {});
     }
 
     return (
         <div className="space-y-4 overflow-y-auto">
             <div>
-                <h3 className="text-sm font-medium mb-3">Select Provider and Statistic</h3>
+                <h3 className="text-sm font-medium mb-3">{t("alerts.selection.select_provider")}</h3>
                 <Table>
                     <Table.Header>
                         <Table.Row>
-                            <Table.HeaderCell>Provider</Table.HeaderCell>
-                            <Table.HeaderCell>Statistics</Table.HeaderCell>
-                            <Table.HeaderCell>Status</Table.HeaderCell>
+                            <Table.HeaderCell>{t("providers.table.provider")}</Table.HeaderCell>
+                            <Table.HeaderCell>{t("providers.table.statistics")}</Table.HeaderCell>
                             <Table.HeaderCell></Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
@@ -169,21 +162,15 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
                                                     </div>
                                                     <div>
                                                         <p className="font-medium">
-                                                            {provider.display_name || provider.id}
+                                                            {t(`sp_${provider.id}.name`, provider.id)}
                                                         </p>
-                                                        <p className="text-ui-fg-muted text-xs">{provider.id}</p>
                                                     </div>
                                                 </div>
                                             </Table.Cell>
                                             <Table.Cell>
                                                 <span className="text-xs text-ui-fg-subtle">
-                                                    {statistics.length || 0} available
+                                                    {t("providers.statistics_count", { count: statistics.length || 0 })}
                                                 </span>
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                <StatusBadge color={provider.is_enabled ? "green" : "grey"}>
-                                                    {provider.is_enabled ? "Active" : "Disabled"}
-                                                </StatusBadge>
                                             </Table.Cell>
                                             <Table.Cell className="text-right">
                                                 {isExpanded ? (
@@ -196,10 +183,10 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
                                         {isExpanded && (
                                             <Table.Row className="bg-ui-bg-subtle hover:bg-ui-bg-subtle">
 
-                                                <Table.Cell colSpan={4}>
+                                                <Table.Cell {...{ colSpan: 4 }}>
                                                     <div className="space-y-2 py-4">
                                                         <h4 className="text-sm font-medium mb-3">
-                                                            Available Statistics
+                                                            {t("alerts.selection.available_functions")}
                                                         </h4>
                                                         <div className="grid gap-2">
                                                             {statistics.map((stat: AvailableStatistic) => (
@@ -217,21 +204,21 @@ const ProviderSelection = ({ form, providers, isLoading }: ProviderSelectionProp
                                                                     <div className="flex items-start justify-between">
                                                                         <div className="flex-1">
                                                                             <p className="font-medium text-sm">
-                                                                                {stat.name || stat.id}
+                                                                                {t(`${provider.id}.${stat.id}.name`, stat.id)}
                                                                             </p>
                                                                             <p className="text-xs text-ui-fg-muted mt-1">
                                                                                 {stat.id}
                                                                             </p>
-                                                                            {stat.description && (
+                                                                            {(stat as any).description && (
                                                                                 <p className="text-xs text-ui-fg-subtle mt-2">
-                                                                                    {stat.description}
+                                                                                    {t(`${provider.id}.${stat.id}.description`, "")}
                                                                                 </p>
                                                                             )}
                                                                         </div>
                                                                         {selectedProviderId === provider.id &&
                                                                             selectedStatisticId === stat.id && (
                                                                                 <Badge color="green" size="small">
-                                                                                    Selected
+                                                                                    {t("alerts.selection.selected")}
                                                                                 </Badge>
                                                                             )}
                                                                     </div>
@@ -258,6 +245,7 @@ interface ParameterInputsProps {
 }
 
 const ParameterInputs = ({ form }: ParameterInputsProps) => {
+    const { t } = useTranslation("stats")
     const selectionMode = form.watch("selection_mode")
     const selectedProviderId = form.watch("provider_id")
     const selectedStatisticId = form.watch("statistic_id")
@@ -276,7 +264,7 @@ const ParameterInputs = ({ form }: ParameterInputsProps) => {
         if (!selectedPreset) {
             return (
                 <div className="text-center text-ui-fg-muted py-8">
-                    Please select a preset option first
+                    {t("alerts.selection.no_preset_selected")}
                 </div>
             )
         }
@@ -288,7 +276,7 @@ const ParameterInputs = ({ form }: ParameterInputsProps) => {
                     <p className="text-xs text-ui-fg-subtle">{selectedPreset.provider_option_name}</p>
                 </div>
                 <Text className="text-ui-fg-subtle text-sm">
-                    This alert uses a cloned preset option. Parameter configuration is copied from the selected preset.
+                    {t("alerts.selection.preset_info")}
                 </Text>
             </div>
         )
@@ -307,15 +295,15 @@ const ParameterInputs = ({ form }: ParameterInputsProps) => {
     if (!selectedStatistic) {
         return (
             <div className="text-center text-ui-fg-muted py-8">
-                Please select a statistic first
+                {t("alerts.selection.no_statistic")}
             </div>
         )
     }
 
-    if (!selectedStatistic.parameters?.fields || selectedStatistic.parameters.fields.length === 0) {
+    if (!selectedStatistic.parameters || selectedStatistic.parameters.length === 0) {
         return (
             <div className="text-center text-ui-fg-muted py-8">
-                This statistic does not require any parameters
+                {t("alerts.selection.no_params")}
             </div>
         )
     }
@@ -323,20 +311,28 @@ const ParameterInputs = ({ form }: ParameterInputsProps) => {
     return (
         <div className="space-y-4">
             <div className="bg-ui-bg-subtle rounded-lg p-4 mb-4">
-                <p className="text-sm font-medium mb-1">{selectedStatistic.name || selectedStatistic.id}</p>
-                {selectedStatistic.description && (
-                    <p className="text-xs text-ui-fg-subtle">{selectedStatistic.description}</p>
+                <p className="text-sm font-medium mb-1">
+                    {t(`${selectedProviderId}.${selectedStatistic.id}.name`, selectedStatistic.id)}
+                </p>
+                {selectedStatistic.metadata?.description && (
+                    <p className="text-xs text-ui-fg-subtle">
+                        {t(`${selectedProviderId}.${selectedStatistic.id}.description`, selectedStatistic.metadata.description) as string}
+                    </p>
                 )}
             </div>
 
-            <h3 className="text-sm font-medium mb-3">Configure Parameters</h3>
+            <h3 className="text-sm font-medium mb-3">{t("alerts.selection.configure_params")}</h3>
             <div className="space-y-4">
-                {selectedStatistic.parameters.fields.map((field: ParameterFieldDefinition) => (
+                {selectedStatistic.parameters.map((field: ParameterField) => (
                     <ParameterInput
                         key={field.name}
                         field={field}
                         value={currentParams[field.name]}
                         onChange={(value: any) => form.setValue(`parameters.${field.name}`, value)}
+                        statContext={{
+                            provider_id: selectedProviderId,
+                            stat_id: selectedStatisticId
+                        }}
                     />
                 ))}
             </div>
@@ -352,6 +348,7 @@ interface CreateAlertModalProps {
 
 export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: CreateAlertModalProps) => {
     const queryClient = useQueryClient()
+    const { t } = useTranslation("stats")
     const [currentTab, setCurrentTab] = useState("info")
     const isEditMode = !!initialAlert
 
@@ -560,10 +557,10 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
     }
 
     const tabs = [
-        { value: "info", label: "Alert Information" },
-        { value: "statistic", label: "Statistic Selection" },
-        { value: "parameters", label: "Parameters" },
-        { value: "condition", label: "Alert Condition" },
+        { value: "info", label: t("alerts.tabs.info") },
+        { value: "statistic", label: t("alerts.tabs.statistic") },
+        { value: "parameters", label: t("alerts.tabs.parameters") },
+        { value: "condition", label: t("alerts.tabs.condition") },
     ]
 
     const nameWatch = form.watch("name")
@@ -605,11 +602,9 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                 <FocusModal.Header>
                     <div className="flex items-center justify-between w-full">
                         <div>
-                            <FocusModal.Title>{isEditMode ? "Edit Alert" : "Create Alert"}</FocusModal.Title>
+                            <FocusModal.Title>{t(isEditMode ? "alerts.edit_title" : "alerts.create_title")}</FocusModal.Title>
                             <FocusModal.Description className="!txt-compact-small-plus text-ui-fg-muted text-sm">
-                                {isEditMode
-                                    ? "Update alert configuration and thresholds"
-                                    : "Set up a new alert to monitor statistics"}
+                                {t(isEditMode ? "alerts.edit_description" : "alerts.create_description")}
                             </FocusModal.Description>
                         </div>
                     </div>
@@ -635,11 +630,11 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                 <ProgressTabs.Content value="info">
                                     <div className="space-y-4">
                                         <div>
-                                            <Label htmlFor="name">Alert Name *</Label>
+                                            <Label htmlFor="name">{t("alerts.name_label")} *</Label>
                                             <Input
                                                 id="name"
                                                 {...form.register("name")}
-                                                placeholder="e.g., Low Revenue Alert"
+                                                placeholder={t("alerts.name_placeholder")}
                                             />
                                             {form.formState.errors.name && (
                                                 <Text className="text-ui-fg-error text-sm mt-1">
@@ -649,17 +644,17 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="description">Description</Label>
+                                            <Label htmlFor="description">{t("alerts.description_label")}</Label>
                                             <Textarea
                                                 id="description"
                                                 {...form.register("description")}
-                                                placeholder="Describe when this alert should trigger..."
+                                                placeholder={t("alerts.description_placeholder")}
                                                 rows={3}
                                             />
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="severity">Severity *</Label>
+                                            <Label htmlFor="severity">{t("alerts.severity_label")} *</Label>
                                             <Controller
                                                 name="severity"
                                                 control={form.control}
@@ -669,9 +664,9 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                                             <Select.Value />
                                                         </Select.Trigger>
                                                         <Select.Content>
-                                                            <Select.Item value="info">Info</Select.Item>
-                                                            <Select.Item value="warning">Warning</Select.Item>
-                                                            <Select.Item value="critical">Critical</Select.Item>
+                                                            <Select.Item value="info">{t("alerts.severity.info")}</Select.Item>
+                                                            <Select.Item value="warning">{t("alerts.severity.warning")}</Select.Item>
+                                                            <Select.Item value="critical">{t("alerts.severity.critical")}</Select.Item>
                                                         </Select.Content>
                                                     </Select>
                                                 )}
@@ -694,7 +689,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                                     : "bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover"
                                                     }`}
                                             >
-                                                Provider Statistics
+                                                {t("alerts.selection.provider_sources")}
                                             </button>
                                             <button
                                                 type="button"
@@ -709,7 +704,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                                     : "bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover"
                                                     }`}
                                             >
-                                                Preset Options
+                                                {t("alerts.selection.preset_options")}
                                             </button>
                                         </div>
 
@@ -721,7 +716,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                             />
                                         ) : (
                                             <div className="space-y-2">
-                                                <h3 className="text-sm font-medium mb-3">Select Preset Option</h3>
+                                                <h3 className="text-sm font-medium mb-3">{t("alerts.selection.select_preset")}</h3>
                                                 {isLoadingPresets ? (
                                                     <div className="space-y-2">
                                                         <Skeleton className="h-14 w-full" />
@@ -731,7 +726,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                                 ) : !presetsData?.options?.length ? (
                                                     <div className="text-center py-8 bg-ui-bg-subtle rounded-lg">
                                                         <Text className="text-ui-fg-muted">
-                                                            No preset options available.
+                                                            {t("alerts.selection.no_presets")}
                                                         </Text>
                                                     </div>
                                                 ) : (
@@ -756,7 +751,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                                                         </div>
                                                                         {isSelected && (
                                                                             <Badge color="green" size="small">
-                                                                                Selected
+                                                                                {t("alerts.selection.selected")}
                                                                             </Badge>
                                                                         )}
                                                                     </div>
@@ -986,7 +981,7 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                     }
                                 }}
                             >
-                                Back
+                                {t("alerts.back")}
                             </Button>
                         )}
 
@@ -1000,14 +995,14 @@ export const CreateAlertModal = ({ open, onOpenChange, initialAlert = null }: Cr
                                 }}
                                 disabled={!canProceed(currentTab)}
                             >
-                                Next
+                                {t("alerts.next")}
                             </Button>
                         ) : (
                             <Button
                                 onClick={form.handleSubmit(onSubmit)}
                                 isLoading={submitMutation.isPending}
                             >
-                                {isEditMode ? "Save Changes" : "Create Alert"}
+                                {isEditMode ? t("alerts.save_changes") : t("alerts.create")}
                             </Button>
                         )}
                     </div>

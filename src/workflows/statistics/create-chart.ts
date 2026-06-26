@@ -11,10 +11,6 @@ export interface CreateChartInput {
     statistic_ids?: string[];
 }
 
-/**
- * Creates a new chart for a statistics view.
- * Optionally links statistics (series) to the chart on creation.
- */
 export const createChartWorkflow = createWorkflow(
     "create-chart",
     (input: CreateChartInput) => {

@@ -1,6 +1,5 @@
 import { createWorkflow, transform, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
 import { fetchOptionWithRelationsStep } from "./steps/fetch-option-with-relations";
-import { fetchAvailableStatisticsStep } from "./steps/fetch-available-statistics";
 import { validateOptionParametersStep } from "./steps/validate-option-parameters";
 
 export interface ValidateOptionConfigurationInput {
@@ -13,10 +12,6 @@ export const validateOptionConfigurationWorkflow = createWorkflow(
 
         const option = fetchOptionWithRelationsStep({ option_id: input.option_id });
 
-
-        const availableStatistics = fetchAvailableStatisticsStep({});
-
-
         const validation = validateOptionParametersStep({
             options: [
                 {
@@ -26,7 +21,6 @@ export const validateOptionConfigurationWorkflow = createWorkflow(
                     provider_id: option.provider.id,
                 },
             ],
-            availableStatistics,
             partialValidation: false,
             throwOnError: false,
         });

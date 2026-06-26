@@ -3,7 +3,7 @@ import { STATISTICS_MODULE } from "../../../modules/statistics";
 import StatisticsService from "../../../modules/statistics/service";
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils";
 import { logger, Query } from "@medusajs/framework";
-import { hasCompleteData, mergeParameters, validateParameters } from "../utils/parameter-utils";
+import { mergeParameters } from "../utils/parameter-utils";
 import { generateStatisticCacheKey, isCachingEnabled, getEffectiveCacheTTL } from "../utils/cache-utils";
 import { DependencyGraphUtils } from "../utils/dependency-graph";
 
@@ -57,9 +57,6 @@ export const calculateStatisticsStep = createStep(
         const errors: Record<string, string> = {};
         const metadata: Record<string, { fromCache: boolean; cachedAt?: string; calculationTime: number }> = {};
 
-
-        const providerStatsMap = new Map<string, any[]>();
-
         for (const optionInput of inputOptions || []) {
             const optionId = optionInput?.id;
 
@@ -109,22 +106,6 @@ export const calculateStatisticsStep = createStep(
 
                         const providerInstance = statisticsService.getProvider(depOption.provider.id, query);
 
-
-                        let availableStats = providerStatsMap.get(depOption.provider.id);
-                        if (!availableStats) {
-                            availableStats = await providerInstance.getAvailableStatistics();
-                            providerStatsMap.set(depOption.provider.id, availableStats);
-                        }
-
-                        const statDefinition = availableStats.find(s => s.id === depOption.provider_option_name);
-
-                        if (!statDefinition) {
-                            throw new MedusaError(
-                                MedusaError.Types.INVALID_DATA,
-                                `Statistic definition not found: ${depOption.provider_option_name}`
-                            );
-                        }
-
                         let parameters = mergeParameters(
                             depOption.data || {},
                             sharedStatsData || {},
@@ -163,11 +144,6 @@ export const calculateStatisticsStep = createStep(
                             parameters = { ...parameters, ...dependencyResults };
                         }
 
-                        const validatedParameters = validateParameters(
-                            parameters,
-                            statDefinition.parameters.fields
-                        );
-
                         const cachingEnabled = !!cacheService && isCachingEnabled(
                             depOption.cache_options as any,
                             sharedCacheOptions as any
@@ -182,7 +158,7 @@ export const calculateStatisticsStep = createStep(
                                 periodStart,
                                 periodEnd,
                                 interval,
-                                parameters: validatedParameters,
+                                parameters,
                             });
 
                             const cached = await cacheService.get({ key: cacheKey });
@@ -197,13 +173,12 @@ export const calculateStatisticsStep = createStep(
                         }
 
                         if (value === null) {
-                            value = await providerInstance.calculateStatistic({
+                            value = await providerInstance.calculate({
                                 id: depOption.provider_option_name,
-                                parameters: validatedParameters,
-                                fields: statDefinition.parameters.fields,
+                                parameters,
                                 periodStart: new Date(periodStart),
                                 periodEnd: new Date(periodEnd),
-                                interval
+                                interval,
                             });
 
                             if (cachingEnabled && cacheKey) {
@@ -257,23 +232,6 @@ export const calculateStatisticsStep = createStep(
 
                 const providerInstance = statisticsService.getProvider(fullOption.provider.id, query);
 
-
-                let availableStats = providerStatsMap.get(fullOption.provider.id);
-                if (!availableStats) {
-                    availableStats = await providerInstance.getAvailableStatistics();
-                    providerStatsMap.set(fullOption.provider.id, availableStats);
-                }
-
-                const statDefinition = availableStats.find(s => s.id === fullOption.provider_option_name);
-
-                if (!statDefinition) {
-                    throw new MedusaError(
-                        MedusaError.Types.INVALID_DATA,
-                        `Statistic definition not found: ${fullOption.provider_option_name}`
-                    );
-                }
-
-
                 const mergedParameters = mergeParameters(
                     fullOption.data || {},
                     sharedStatsData || {},
@@ -281,12 +239,6 @@ export const calculateStatisticsStep = createStep(
                     fullOption.local_option_name,
                     fullOption.provider_option_name,
                     fullOption.provider.id
-                );
-
-
-                const validatedParameters = validateParameters(
-                    mergedParameters,
-                    statDefinition.parameters.fields
                 );
 
 
@@ -305,7 +257,7 @@ export const calculateStatisticsStep = createStep(
                         periodStart,
                         periodEnd,
                         interval,
-                        parameters: validatedParameters
+                        parameters: mergedParameters
                     });
 
 
@@ -325,13 +277,12 @@ export const calculateStatisticsStep = createStep(
                 }
 
 
-                const result = await providerInstance.calculateStatistic({
+                const result = await providerInstance.calculate({
                     id: fullOption.provider_option_name,
-                    parameters: validatedParameters,
-                    fields: statDefinition.parameters.fields,
+                    parameters: mergedParameters,
                     periodStart: new Date(periodStart),
                     periodEnd: new Date(periodEnd),
-                    interval
+                    interval,
                 });
 
                 const statCalculationTime = Date.now() - statStartTime;
@@ -372,7 +323,6 @@ export const calculateStatisticsStep = createStep(
         return new StepResponse({
             results,
             errors: Object.keys(errors).length > 0 ? errors : undefined,
-            definitions: Object.fromEntries(providerStatsMap.entries()),
             metadata,
             duration: totalDuration
         });

@@ -33,7 +33,7 @@ const registrationFn = async (klass: any, container: MedusaContainer, pluginOpti
 
 
     logger.info(`Registered statistics provider: ${klass.identifier} with key: ${key}`);
-    container.registerAdd(PROVIDER_REGISTRATION_KEY, asValue({ id: key, display_name: klass.displayName || klass.identifier }))
+    container.registerAdd(PROVIDER_REGISTRATION_KEY, asValue({ id: key, display_name: klass.identifier }))
 }
 
 export default async ({
@@ -47,6 +47,7 @@ export default async ({
         providers: ModuleProvider[]
     }
 >): Promise<void> => {
+
     await moduleProviderLoader({
         container,
         providers: options?.providers || [],

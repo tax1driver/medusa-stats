@@ -680,7 +680,7 @@ const AddSeriesToChartDrawer = ({
                                     : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
                                     }`}
                             >
-                                Provider Statistics
+                                Provider Sources
                             </button>
                             <button
                                 type="button"
@@ -1272,40 +1272,165 @@ const ViewDetailPage = () => {
 
             <div className="flex flex-col gap-6">
 
-                <Container className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <div>
-                                <Heading level="h1">{view.name}</Heading>
-                                {view.description && (
-                                    <Text className="text-ui-fg-subtle">{view.description}</Text>
-                                )}
-                            </div>
+                <Container className="divide-y p-0">
+                    <div className="flex items-stretch gap-x-3 gap-y-2 px-6 py-3 flex-wrap">
+                        <div className="flex items-center gap-3 min-w-0 mr-2 flex-shrink-0">
+                            <Heading level="h1" className="truncate">{view.name}</Heading>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="self-stretch w-px bg-ui-border-base hidden md:block flex-shrink-0" />
+
+                        <div className="flex items-stretch border border-ui-border-base rounded-lg overflow-hidden flex-shrink-0 *:flex *:items-center">
+                            {quickRollingPeriodPresets.map((preset) => (
+                                <button
+                                    key={preset.key}
+                                    type="button"
+                                    onClick={() => applyPeriodPreset(preset.key)}
+                                    className={`px-2.5 py-1 text-xs transition-colors border-r border-ui-border-base ${selectedPeriodPresetKey === preset.key
+                                        ? 'bg-ui-bg-component-pressed text-white'
+                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
+                                        }`}
+                                >
+                                    {preset.quickLabel}
+                                </button>
+                            ))}
+                            {quickCalendarPeriodPresets.map((preset) => (
+                                <button
+                                    key={preset.key}
+                                    type="button"
+                                    onClick={() => applyPeriodPreset(preset.key)}
+                                    className={`px-2.5 py-1 text-xs transition-colors border-r border-ui-border-base ${selectedPeriodPresetKey === preset.key
+                                        ? 'bg-ui-bg-component-pressed text-white'
+                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
+                                        }`}
+                                >
+                                    {preset.quickLabel}
+                                </button>
+                            ))}
+                            {selectedNonQuickPeriodPreset && (
+                                <button
+                                    type="button"
+                                    onClick={() => applyPeriodPreset(selectedNonQuickPeriodPreset.key)}
+                                    className="px-2.5 py-1 text-xs transition-colors border-r border-ui-border-base bg-ui-bg-component-pressed text-white"
+                                >
+                                    {selectedNonQuickPeriodPreset.quickLabel}
+                                </button>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenu.Trigger asChild>
+                                    <button className="px-2 py-1 text-xs transition-colors bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover">
+                                        <EllipsisHorizontal />
+                                    </button>
+                                </DropdownMenu.Trigger>
+                                <DropdownMenu.Content>
+                                    <DropdownMenu.Label className="px-2">Rolling Periods</DropdownMenu.Label>
+                                    {PERIOD_PRESETS.filter(p => p.type === 'rolling').map(p => (
+                                        <DropdownMenu.Item key={p.key} onClick={() => applyPeriodPreset(p.key)}>{p.label}</DropdownMenu.Item>
+                                    ))}
+                                    <DropdownMenu.Separator />
+                                    <DropdownMenu.Label className="px-2">Calendar Periods</DropdownMenu.Label>
+                                    {PERIOD_PRESETS.filter(p => p.type === 'calendar').map(p => (
+                                        <DropdownMenu.Item key={p.key} onClick={() => applyPeriodPreset(p.key)}>{p.label}</DropdownMenu.Item>
+                                    ))}
+                                    <DropdownMenu.Separator />
+                                    <DropdownMenu.Item onClick={() => setIsCustomPeriod(true)}>Custom Range...</DropdownMenu.Item>
+                                </DropdownMenu.Content>
+                            </DropdownMenu>
+                        </div>
+
+                        <div className="self-stretch w-px bg-ui-border-base hidden md:block flex-shrink-0" />
+                        <div className="flex items-stretch border border-ui-border-base rounded-lg overflow-hidden flex-shrink-0 *:flex *:items-center">
+                            {quickIntervalPresets.map((preset) => (
+                                <button
+                                    key={preset.seconds}
+                                    type="button"
+                                    onClick={() => applyIntervalPreset(preset.seconds)}
+                                    className={`px-2.5 py-1 text-xs transition-colors border-r border-ui-border-base ${selectedIntervalPresetSeconds === preset.seconds
+                                        ? 'bg-ui-bg-component-pressed text-white'
+                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
+                                        }`}
+                                >
+                                    {preset.quickLabel}
+                                </button>
+                            ))}
+                            {selectedNonQuickIntervalPreset && (
+                                <button
+                                    type="button"
+                                    onClick={() => applyIntervalPreset(selectedNonQuickIntervalPreset.seconds)}
+                                    className="px-2.5 py-1 text-xs transition-colors border-r border-ui-border-base bg-ui-bg-component-pressed text-white"
+                                >
+                                    {selectedNonQuickIntervalPreset.quickLabel}
+                                </button>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenu.Trigger asChild>
+                                    <button className="px-2 py-1 text-xs transition-colors bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover">
+                                        <EllipsisHorizontal />
+                                    </button>
+                                </DropdownMenu.Trigger>
+                                <DropdownMenu.Content>
+                                    <DropdownMenu.Label className="px-2">Time Intervals</DropdownMenu.Label>
+                                    {INTERVAL_PRESETS.map(p => (
+                                        <DropdownMenu.Item key={p.seconds} onClick={() => applyIntervalPreset(p.seconds)}>{p.label}</DropdownMenu.Item>
+                                    ))}
+                                    <DropdownMenu.Separator />
+                                    <DropdownMenu.Item onClick={() => setIsCustomInterval(true)}>Custom Interval...</DropdownMenu.Item>
+                                </DropdownMenu.Content>
+                            </DropdownMenu>
+                        </div>
+                        <div className="self-stretch w-px bg-ui-border-base hidden md:block flex-shrink-0" />
+                        <div className="flex items-stretch border border-ui-border-base rounded-lg overflow-hidden flex-shrink-0 *:flex *:items-center">
+                            {(['compact', 'medium', 'large'] as const).map((size) => (
+                                <button
+                                    key={size}
+                                    type="button"
+                                    onClick={() => { if (gridSize !== size) { setGridSize(size); setHasUnsavedChanges(true) } }}
+                                    className={`px-2 py-1 text-xs transition-colors border-r border-ui-border-base last:border-r-0 ${gridSize === size
+                                        ? 'bg-ui-bg-component-pressed text-white'
+                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
+                                        }`}
+                                >
+                                    {size === 'compact' ? '≡' : size === 'medium' ? '⊞' : '⊟'}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex-1" />
+                        <div className="flex items-stretch border border-ui-border-base rounded-lg overflow-hidden flex-shrink-0 *:flex *:items-center">
+                            {isCalculating && (
+                                <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-ui-fg-muted">
+                                    <div className="animate-spin h-3.5 w-3.5 border-2 border-ui-fg-muted border-t-transparent rounded-full" />
+                                    Calculating...
+                                </span>
+                            )}
+                            {!isCalculating && calculationResults?.duration !== undefined && (
+                                <span className="px-2.5 py-1 text-xs text-ui-fg-subtle">
+                                    {calculationResults.duration.toFixed(2)}s
+                                    {cacheStats && cacheStats.cachedStats > 0 && ` (cached ${formatDate(cacheStats.oldestCache, "HH:mm:ss")})`}
+                                </span>
+                            )}
                             {hasUnsavedChanges && (
                                 <>
-                                    <Button
-                                        size="small"
-                                        variant="secondary"
+                                    <button
+                                        type="button"
                                         onClick={handleDiscardChanges}
+                                        className="px-2.5 py-1 text-xs transition-colors border-l border-ui-border-base bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover"
                                     >
                                         Discard
-                                    </Button>
-                                    <Button
-                                        size="small"
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={handleSavePeriodConfig}
-                                        isLoading={updatePeriodConfigMutation.isPending}
+                                        disabled={updatePeriodConfigMutation.isPending}
+                                        className="px-2.5 py-1 text-xs transition-colors border-l border-ui-border-base bg-ui-bg-component-pressed text-white"
                                     >
-                                        Save
-                                    </Button>
+                                        {updatePeriodConfigMutation.isPending ? "Saving..." : "Save"}
+                                    </button>
                                 </>
                             )}
                             <DropdownMenu>
                                 <DropdownMenu.Trigger asChild>
-                                    <IconButton size="small">
+                                    <button className={`px-2 py-1 text-xs transition-colors ${hasUnsavedChanges ? 'border-l border-ui-border-base' : ''} bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover`}>
                                         <EllipsisHorizontal />
-                                    </IconButton>
+                                    </button>
                                 </DropdownMenu.Trigger>
                                 <DropdownMenu.Content>
                                     <DropdownMenu.Item onClick={() => setIsEditViewOpen(true)}>
@@ -1325,201 +1450,39 @@ const ViewDetailPage = () => {
                             </DropdownMenu>
                         </div>
                     </div>
-
-
-                    <div className="border-t border-ui-border-base pt-4 mt-4">
-
-                        <div className="mb-4">
-                            <Label size="small" className="mb-2">Period</Label>
-                            <div className="flex items-center gap-2">
-
-                                <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
-                                    <div
-                                        className={`flex items-center px-3 py-1.5 text-sm transition-colors border-r bg-ui-bg-disabled text-ui-fg-base `}
-                                    >
-                                        Rolling
-                                    </div>
-                                    {quickRollingPeriodPresets.map((preset) => (
-                                        <button
-                                            key={preset.key}
-                                            type="button"
-                                            onClick={() => applyPeriodPreset(preset.key)}
-                                            className={`px-3 py-1.5 text-sm transition-colors border-r border-ui-border-base ${selectedPeriodPresetKey === preset.key
-                                                ? 'bg-ui-bg-base text-ui-fg-base'
-                                                : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
-                                                }`}
-                                        >
-                                            {preset.quickLabel}
-                                        </button>
-                                    ))}
-                                    <div
-                                        className={`flex items-center px-3 py-1.5 text-sm transition-colors border-r border-l bg-ui-bg-disabled text-ui-fg-base`}
-                                    >
-                                        Calendar
-                                    </div>
-                                    {quickCalendarPeriodPresets.map((preset) => (
-                                        <button
-                                            key={preset.key}
-                                            type="button"
-                                            onClick={() => applyPeriodPreset(preset.key)}
-                                            className={`px-3 py-1.5 text-sm transition-colors border-r border-ui-border-base ${selectedPeriodPresetKey === preset.key
-                                                ? 'bg-ui-bg-base text-ui-fg-base'
-                                                : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
-                                                }`}
-                                        >
-                                            {preset.quickLabel}
-                                        </button>
-                                    ))}
-                                    {selectedNonQuickPeriodPreset && (
-                                        <button
-                                            type="button"
-                                            onClick={() => applyPeriodPreset(selectedNonQuickPeriodPreset.key)}
-                                            className="px-3 py-1.5 text-sm transition-colors bg-ui-bg-base text-ui-fg-base"
-                                        >
-                                            {selectedNonQuickPeriodPreset.quickLabel}
-                                        </button>
-                                    )}
-                                </div>
-
-
-                                <DropdownMenu>
-                                    <DropdownMenu.Trigger asChild>
-                                        <Button size="small" variant="secondary">
-                                            <EllipsisHorizontal />
-                                        </Button>
-                                    </DropdownMenu.Trigger>
-                                    <DropdownMenu.Content>
-                                        <DropdownMenu.Label className="px-2">Rolling Periods</DropdownMenu.Label>
-                                        {PERIOD_PRESETS
-                                            .filter((preset) => preset.type === 'rolling')
-                                            .map((preset) => (
-                                                <DropdownMenu.Item key={preset.key} onClick={() => applyPeriodPreset(preset.key)}>
-                                                    {preset.label}
-                                                </DropdownMenu.Item>
-                                            ))}
-
-                                        <DropdownMenu.Separator />
-                                        <DropdownMenu.Label className="px-2">Calendar Periods</DropdownMenu.Label>
-                                        {PERIOD_PRESETS
-                                            .filter((preset) => preset.type === 'calendar')
-                                            .map((preset) => (
-                                                <DropdownMenu.Item key={preset.key} onClick={() => applyPeriodPreset(preset.key)}>
-                                                    {preset.label}
-                                                </DropdownMenu.Item>
-                                            ))}
-
-                                        <DropdownMenu.Separator />
-                                        <DropdownMenu.Item onClick={() => {
-                                            setIsCustomPeriod(true)
-                                        }}>
-                                            Custom Range...
-                                        </DropdownMenu.Item>
-                                    </DropdownMenu.Content>
-                                </DropdownMenu>
+                    {isCustomPeriod && (
+                        <div className="px-6 py-3 border-t border-ui-border-base bg-ui-bg-subtle">
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <Label size="xsmall" htmlFor="periodStart" className="text-ui-fg-subtle">Start</Label>
+                                <Input
+                                    id="periodStart"
+                                    type="date"
+                                    size="small"
+                                    value={periodStart}
+                                    onChange={(e) => { setPeriodStart(e.target.value); setCurrentPeriodType('custom'); setCurrentPeriodConfig({ start: e.target.value, end: periodEnd }); setHasUnsavedChanges(true) }}
+                                    className="w-40"
+                                />
+                                <Label size="xsmall" htmlFor="periodEnd" className="text-ui-fg-subtle">End</Label>
+                                <Input
+                                    id="periodEnd"
+                                    type="date"
+                                    size="small"
+                                    value={periodEnd}
+                                    onChange={(e) => { setPeriodEnd(e.target.value); setCurrentPeriodType('custom'); setCurrentPeriodConfig({ start: periodStart, end: e.target.value }); setHasUnsavedChanges(true) }}
+                                    className="w-40"
+                                />
                             </div>
                         </div>
+                    )}
 
-                        {isCustomPeriod && (
-                            <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <Label size="small" htmlFor="periodStart">Start Date</Label>
-                                    <Input
-                                        id="periodStart"
-                                        type="date"
-                                        value={periodStart}
-                                        onChange={(e) => {
-                                            setPeriodStart(e.target.value)
-                                            const customConfig = {
-                                                start: e.target.value,
-                                                end: periodEnd
-                                            }
-                                            setCurrentPeriodType('custom')
-                                            setCurrentPeriodConfig(customConfig)
-                                            setHasUnsavedChanges(true)
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <Label size="small" htmlFor="periodEnd">End Date</Label>
-                                    <Input
-                                        id="periodEnd"
-                                        type="date"
-                                        value={periodEnd}
-                                        onChange={(e) => {
-                                            setPeriodEnd(e.target.value)
-                                            const customConfig = {
-                                                start: periodStart,
-                                                end: e.target.value
-                                            }
-                                            setCurrentPeriodType('custom')
-                                            setCurrentPeriodConfig(customConfig)
-                                            setHasUnsavedChanges(true)
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="">
-                            <Label size="small" className="mb-2">Interval</Label>
+                    {isCustomInterval && (
+                        <div className="px-6 py-3 border-t border-ui-border-base bg-ui-bg-subtle">
                             <div className="flex items-center gap-2">
-
-                                <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
-                                    {quickIntervalPresets.map((preset) => (
-                                        <button
-                                            key={preset.seconds}
-                                            type="button"
-                                            onClick={() => applyIntervalPreset(preset.seconds)}
-                                            className={`px-3 py-1.5 text-sm transition-colors border-r border-ui-border-base ${selectedIntervalPresetSeconds === preset.seconds
-                                                ? 'bg-ui-bg-base text-ui-fg-base'
-                                                : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
-                                                }`}
-                                        >
-                                            {preset.quickLabel}
-                                        </button>
-                                    ))}
-                                    {selectedNonQuickIntervalPreset && (
-                                        <button
-                                            type="button"
-                                            onClick={() => applyIntervalPreset(selectedNonQuickIntervalPreset.seconds)}
-                                            className="px-3 py-1.5 text-sm transition-colors bg-ui-bg-base text-ui-fg-base"
-                                        >
-                                            {selectedNonQuickIntervalPreset.quickLabel}
-                                        </button>
-                                    )}
-                                </div>
-
-
-                                <DropdownMenu>
-                                    <DropdownMenu.Trigger asChild>
-                                        <Button size="small" variant="secondary">
-                                            <EllipsisHorizontal />
-                                        </Button>
-                                    </DropdownMenu.Trigger>
-                                    <DropdownMenu.Content>
-                                        <DropdownMenu.Label className="px-2">Time Intervals</DropdownMenu.Label>
-                                        {INTERVAL_PRESETS.map((preset) => (
-                                            <DropdownMenu.Item key={preset.seconds} onClick={() => applyIntervalPreset(preset.seconds)}>
-                                                {preset.label}
-                                            </DropdownMenu.Item>
-                                        ))}
-
-                                        <DropdownMenu.Separator />
-                                        <DropdownMenu.Item onClick={() => {
-                                            setIsCustomInterval(true)
-                                        }}>
-                                            Custom Interval...
-                                        </DropdownMenu.Item>
-                                    </DropdownMenu.Content>
-                                </DropdownMenu>
-                            </div>
-                        </div>
-
-                        {isCustomInterval && (
-                            <div className="mt-2 flex gap-2">
+                                <Label size="xsmall" className="text-ui-fg-subtle">Custom Interval</Label>
                                 <Input
                                     type="number"
                                     min="1"
+                                    size="small"
                                     value={customIntervalCount}
                                     onChange={(e) => handleCustomIntervalChange(Number(e.target.value) || 1, customIntervalUnit)}
                                     className="w-20"
@@ -1528,6 +1491,7 @@ const ViewDetailPage = () => {
                                 <Select
                                     value={customIntervalUnit}
                                     onValueChange={(val: 'm' | 'H' | 'D' | 'W' | 'M') => handleCustomIntervalChange(customIntervalCount, val)}
+                                    size="small"
                                 >
                                     <Select.Trigger>
                                         <Select.Value />
@@ -1541,83 +1505,17 @@ const ViewDetailPage = () => {
                                     </Select.Content>
                                 </Select>
                             </div>
-                        )}
-                        {isCalculating && (
-                            <div className="mt-4 flex items-center gap-2 text-sm text-ui-fg-muted">
-                                <div className="animate-spin h-4 w-4 border-2 border-ui-fg-muted border-t-transparent rounded-full" />
-                                <Text>Calculating statistics...</Text>
-                            </div>
-                        )}
-                        {!isCalculating && calculationResults?.duration !== undefined && (
-                            <div className="mt-4 space-y-1">
-                                <div className="text-sm text-ui-fg-subtle">
-                                    <Text className="text-xs">
-                                        Done in {calculationResults.duration.toFixed(2)} seconds.
-                                        {cacheStats && cacheStats.cachedStats > 0 && `(cache time: ${formatDate(cacheStats.oldestCache, "dd.MM.yyyy HH:mm:ss")})`}
-                                    </Text>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </Container>
 
 
                 <Container className="p-6">
                     <div className="flex items-center justify-between mb-4">
                         <Heading level="h2">Charts ({view.charts?.length || 0})</Heading>
-                        <div className="flex items-center gap-2">
-
-                            <div className="flex items-center border border-ui-border-base rounded-lg overflow-hidden">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (gridSize !== 'compact') {
-                                            setGridSize('compact')
-                                            setHasUnsavedChanges(true)
-                                        }
-                                    }}
-                                    className={`px-3 py-1.5 text-sm transition-colors border-r border-ui-border-base ${gridSize === 'compact'
-                                        ? 'bg-ui-bg-base text-ui-fg-base'
-                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
-                                        }`}
-                                >
-                                    Compact
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (gridSize !== 'medium') {
-                                            setGridSize('medium')
-                                            setHasUnsavedChanges(true)
-                                        }
-                                    }}
-                                    className={`px-3 py-1.5 text-sm transition-colors border-r border-ui-border-base ${gridSize === 'medium'
-                                        ? 'bg-ui-bg-base text-ui-fg-base'
-                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
-                                        }`}
-                                >
-                                    Medium
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (gridSize !== 'large') {
-                                            setGridSize('large')
-                                            setHasUnsavedChanges(true)
-                                        }
-                                    }}
-                                    className={`px-3 py-1.5 text-sm transition-colors ${gridSize === 'large'
-                                        ? 'bg-ui-bg-base text-ui-fg-base'
-                                        : 'bg-ui-bg-subtle text-ui-fg-muted hover:bg-ui-bg-subtle-hover'
-                                        }`}
-                                >
-                                    Large
-                                </button>
-                            </div>
-                            <Button size="small" variant="secondary" onClick={() => setIsCreateChartOpen(true)}>
-                                Create
-                            </Button>
-                        </div>
+                        <Button size="small" variant="secondary" onClick={() => setIsCreateChartOpen(true)}>
+                            Create
+                        </Button>
                     </div>
                     <div className={`grid gap-4 ${gridSize === 'compact' ? 'grid-cols-1 md:grid-cols-3' :
                         gridSize === 'large' ? 'grid-cols-1' :

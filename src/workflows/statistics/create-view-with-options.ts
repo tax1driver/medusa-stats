@@ -1,7 +1,6 @@
 import { createWorkflow, transform, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
 import { validateViewInputStep } from "./steps/validate-view-input";
 import { createStatisticsViewStep } from "./steps/create-statistics-view";
-import { fetchAvailableStatisticsStep } from "./steps/fetch-available-statistics";
 import { validateOptionParametersStep } from "./steps/validate-option-parameters";
 import { createStatisticsOptionsStep } from "./steps/create-statistics-options";
 
@@ -34,12 +33,8 @@ export const createViewWithOptionsWorkflow = createWorkflow(
             return [...new Set(input.map(opt => opt.provider_id))];
         });
 
-        const availableStatistics = fetchAvailableStatisticsStep({});
-
-
         validateOptionParametersStep({
             options: input.options,
-            availableStatistics
         });
 
 

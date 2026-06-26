@@ -28,7 +28,7 @@ export const fetchAvailableStatisticsStep = createStep(
             try {
 
                 const providerInstance = statisticsService.getProvider(provider.id, query);
-                const statistics = await providerInstance.getAvailableStatistics();
+                const statistics = providerInstance.listStatistics();
 
 
                 const enrichedStats = statistics.map(stat => ({

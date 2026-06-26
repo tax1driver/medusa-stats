@@ -1,10 +1,11 @@
 import { InjectManager, MedusaContext, MedusaService, MedusaError, ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { StatisticsOption, StatisticsProvider, StatisticsView, StatisticsAlert, StatisticsAlertLog, StatisticsChart, StatisticOptionInput } from "./models";
 import { EntityManager, SqlEntityManager, t } from "@medusajs/framework/mikro-orm/knex";
-import { Context, DAL, InferTypeOf } from "@medusajs/framework/types";
+import { Context, DAL, InferTypeOf, ModuleOptions } from "@medusajs/framework/types";
 import { AbstractStatisticsProvider } from "./providers/provider";
 import { container, logger, MedusaContainer, Query } from "@medusajs/framework";
 import { asValue } from "@medusajs/framework/awilix";
+import { BUILT_IN_CHART_TYPES } from "./chart-types";
 
 type StatisticsProvider = InferTypeOf<typeof StatisticsProvider>;
 
@@ -19,16 +20,18 @@ export default class StatisticsService extends MedusaService({
 }) {
     protected providerRepository_: DAL.RepositoryService<StatisticsProvider>;
     protected container_: any;
+    protected config_: ModuleOptions & { renderers?: string[] };
 
     constructor({
         statisticsProviderRepository,
         ...container
     }: {
         statisticsProviderRepository: DAL.RepositoryService<StatisticsProvider>;
-    }) {
+    }, config: ModuleOptions) {
         super(...arguments);
         this.providerRepository_ = statisticsProviderRepository;
         this.container_ = container as any;
+        this.config_ = config;
     }
 
     async upsertStatisticsProviders(data: any[], context?: any) {
@@ -244,6 +247,10 @@ export default class StatisticsService extends MedusaService({
             { ...filters, preset: true },
             config
         );
+    }
+
+    async getChartTypes(): Promise<string[]> {
+        return [...BUILT_IN_CHART_TYPES, ...(this.config_.renderers || [])];
     }
 
 }

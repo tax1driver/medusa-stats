@@ -23,13 +23,13 @@
 
 ## Overview
 
-`medusa-stats` is a flexible statistics module for Medusa that features:
+`medusa-stats` is an analytics visualization plugin for Medusa that features:
 
 - Pluggable statistics providers
 - Views, options, and chart composition
 - Composite statistics (statistics depending on other statistics)
 - Statistics-triggered configurable alerts
-- UI interface and admin routes for full statistics lifecycle management
+- Admin UI with i18n support
 - Caching for optimized performance
 
 ## Installation
@@ -40,8 +40,6 @@ npm install medusa-stats
 yarn add medusa-stats
 ```
 
-
-
 ## Configuration
 
 Add the plugin to your `medusa-config.ts`:
@@ -50,7 +48,7 @@ Add the plugin to your `medusa-config.ts`:
 modules: [
   {
     resolve: "medusa-stats/modules/statistics",
-    dependencies: [ContainerRegistrationKeys.QUERY], // Query dependency is required in order to be injected into the providers
+    dependencies: [ContainerRegistrationKeys.QUERY], // Query dependency is required for provider data access
     options: {
       providers: [
         {
@@ -61,32 +59,47 @@ modules: [
   },
 ],
 plugins: [
-  `medusa-stats`
+  `medusa-stats`,
 ]
 ```
 
 ## Basic Usage
-The plugin provides a framework for defining and calculating statistics as well as an admin interface for their management and visualization. The primary goal of the module is to provide a flexible way to create custom statistics and views that suit your business needs, without being limited to predefined metrics. 
+
+The plugin provides a framework for defining and calculating statistics as well as an admin interface for their management and visualization. The primary goal of the module is to provide a flexible way to create custom statistics and views that suit your business needs, without being limited to predefined metrics.
 
 The module can also be used out-of-the-box with pre-defined statistics providers and the admin interface.
 
 ### Views
-Views are collections of related statistics visualizations. They allow you to organize statistics in any way that suits your needs. Every chart in a view can display multiple statistical measurements, each based on a different statistic option.
+
+Views are collections of related statistics visualizations. They allow you to organize statistics in any way that suits your needs. Every chart in a view can display multiple statistical measurements, each based on a different statistic option. The view page includes a compact toolbar for switching period presets, interval settings, and grid layout sizes.
 
 ![Views Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/view.png)
 
 ### Options
-Options are instances of statistics that are calculated with specific parameters. By changing an option's parameters, you can adjust the underlying statistic calculation. 
+
+Options are instances of statistics that are calculated with specific parameters. By changing an option's parameters, you can adjust the underlying statistic calculation.
 
 ![Options Parameters Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/params.png)
 
-When editing, options can also be configured in terms of their visualization (chart type, dimensions, etc.), cache settings and other parameters.
+When editing, options can also be configured in terms of their visualization (chart type, series style, dimensions, colors, etc.), cache settings, and other parameters. Options can be saved as reusable **Presets**.
 
 ![Visualization Settings Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/visualizations.png)
 
+### Chart Types
+
+The module supports multiple built-in chart types, selectable per series:
+
+| Type        | Description                                        |
+| ----------- | -------------------------------------------------- |
+| `2d`        | Standard 2D chart (line, bar, area series)         |
+| `aggregate` | Summary cards showing the latest value per series  |
+| `list`      | Paginated data table with optional aggregation row |
+
+~~Custom chart types can be added by using LayoutComposer's widget injection.~~ *todo/layout composer seemed to crash randomly while testing due to invalid context data* 
+
 ## Providers
 
-Providers define what statistics are available and how they are calculated.
+Providers define what statistics are available and how they are calculated. Each statistic is defined using the `@StatFn` decorator with a Zod parameter schema.
 
 ### Add provider to project
 
@@ -106,6 +119,7 @@ modules: [
   },
 ]
 ```
+
 ### Included providers
 
 `medusa-stats` includes two built-in providers:
@@ -116,82 +130,44 @@ modules: [
   - Composite/stat-transform statistics that consume other statistic outputs.
   - Included statistics: `moving_average`, `rate_of_change`.
 
-
 ### Creating a Statistics Provider
 
-Create a provider class by extending `AbstractStatisticsProvider`, expose available statistics in `getAvailableStatistics`, and implement calculation logic in `calculateStatistic`.
+Create a provider class by extending `AbstractStatisticsProvider` and define each statistic as a method decorated with `@StatFn`. The decorator's `StatOptions` include a **Zod schema** for parameter validation, an optional preferred chart type, dimension hint, and arbitrary metadata.
 
-Example: a `total_cart_value` statistic (available in the Common Statistics Provider) with filters for currency and cart status.
+Example: a `total_cart_value` statistic with a currency filter.
 
 ```typescript
 import { ModuleProvider } from "@medusajs/framework/utils"
+import { z } from "zod"
 import {
   AbstractStatisticsProvider,
-  StatBuilder,
-  createTimeSeries,
+  StatFn,
+  createQueryTimeSeries,
   sum,
-  type AvailableStatistic,
-  type CalculateStatisticInput,
+  type StatCalculationInput,
   type StatisticResult,
 } from "medusa-stats"
 
+const totalCartValueSchema = z.object({
+  currency_code: z.string().optional(),
+})
+
 class MyStatisticsProvider extends AbstractStatisticsProvider {
   static identifier = "my-statistics"
-  static displayName = "My Statistics Provider"
 
-  async getAvailableStatistics(): Promise<AvailableStatistic[]> {
-    return [
-      new StatBuilder("total_cart_value", "Total Cart Value")
-            .description("Total value of all carts over time")
-            .field({
-                name: "currency_code",
-                label: "Currency",
-                description: "Filter by currency code",
-                schema: z.string().optional(),
-                fieldType: "text",
-                placeholder: "USD"
-            })
-            .chart("line")
-            .dimension("time")
-            .build(),
-    ]
-  }
+  @StatFn("total_cart_value", {
+    schema: totalCartValueSchema,
+  })
+  async totalCartValue({ parameters, ...input }: StatCalculationInput): Promise<StatisticResult> {
+    const currencyCode = parameters.currency_code
 
-  async calculateStatistic(input: CalculateStatisticInput): Promise<StatisticResult> {
-    const { id, parameters, periodStart, periodEnd, interval } = input;
-    
-    switch(id) {
-        case "total_cart_value": {
-            const currencyCode = parameters.currency_code;
+    const timeSeries = await createQueryTimeSeries(this.query, input, {
+      entity: "cart",
+      fields: ["id", "created_at", "total"],
+      filters: currencyCode ? { currency_code: currencyCode } : {},
+    }, sum("total"))
 
-            const filters: any = {
-                created_at: { $gte: periodStart, $lte: periodEnd }
-            };
-
-            if (currencyCode) {
-                filters.currency_code = currencyCode;
-            }
-
-            const { data: carts } = await this.query.graph({
-                entity: "cart",
-                fields: ["id", "created_at", "total"],
-                filters
-            });
-
-            const timeSeries = createTimeSeries( // helper function for time series creation
-                carts,
-                periodStart,
-                periodEnd,
-                interval,
-                sum('total') // helper accumulator function
-            );
-
-            return {
-                value: timeSeries,
-                metadata: { totalCarts: carts.length }
-            };
-        }
-    }
+    return { value: timeSeries }
   }
 }
 
@@ -200,47 +176,60 @@ export default ModuleProvider("statistics", {
 })
 ```
 
+### Helper Utilities
 
+The package exports several data-processing utilities from `medusa-stats`:
+
+| Function                                                        | Description                                   |
+| --------------------------------------------------------------- | --------------------------------------------- |
+| `createTimeSeries(data, start, end, interval, accumulator)`     | Build a time series from raw data             |
+| `createQueryTimeSeries(query, input, queryParams, accumulator)` | Query + build a time series in one call       |
+| `groupBy(data, keySelector, aggregator?)`                       | Group data by a key with optional aggregation |
+| `generateIntervals(start, end, interval)`                       | Generate interval timestamps for a period     |
+| `getIntervalBucket(date, periodStart, interval)`                | Get the interval bucket for a given date      |
+| `count()`                                                       | Accumulator: count of items                   |
+| `sum(field)`                                                    | Accumulator: sum of a field                   |
+| `average(field, options?)`                                      | Accumulator: average of a field               |
 
 ## Composite Statistics
 
-Composite statistics allow one statistic option to use another option's output as an input.
+Composite statistics allow one statistic option to use another option's output as an input. This is configured by setting **Input Dependencies** in the option editor — map a dependency to a parameter name.
 
 ### Admin Usage
-A stat option can be configured to receive another statistic's output by settings its value in the Dependecnies section when editing a stat instance in the admin dashboard.
+
+A stat option can be configured to receive another statistic's output in the Dependencies section when editing a stat instance in the admin dashboard.
 
 ![Dependencies Image](https://github.com/tax1driver/medusa-stats/blob/master/docs/static/composite.png)
 
 ### Using composite fields in providers
 
-To make a statistic composable, define a provider parameter with `fieldType: "stat"`.
-At runtime, that parameter receives dependency output data and can be processed like any other input.
+To make a statistic composable, define a Zod schema for the input and use `.meta({ type: "stat" })` to mark the field as a stat dependency. At runtime, that parameter receives the dependency's calculation result.
 
 ```typescript
 import { z } from "zod"
-import { StatBuilder } from "medusa-stats"
+import { StatFn } from "medusa-stats"
 
-new StatBuilder("moving_average", "Moving Average")
-  .description("Smooth a time series by averaging values over a rolling window")
-  .field(
-    {
-      name: "input_series",
-      label: "Input Series",
-      description: "Dependency result to analyze",
-      fieldType: "stat",
-      schema: TimeSeriesSchema
-    }
-  )
-  .field(
-    {
-      name: "window_size",
-      label: "Window Size",
-      fieldType: "number",
-      schema: z.number().int().min(2).max(365).default(7),
-    },
-    7 // initial value
-  )
-  .build()
+const timeSeriesSchema = z.object({
+  value: z.array(z.object({
+    x: z.union([z.string(), z.date(), z.number()]),
+    value: z.number(),
+  }))
+})
+
+const movingAverageSchema = z.object({
+  input_series: timeSeriesSchema.meta({ type: "stat" }),
+  window_size: z.number().int().min(2).max(365).default(7),
+})
+
+class MyProvider extends AbstractStatisticsProvider {
+  @StatFn("moving_average", {
+    schema: movingAverageSchema,
+  })
+  async movingAverage({ parameters }: StatCalculationInput): Promise<StatisticResult> {
+    const inputSeries = parameters.input_series.value
+    // ... compute moving average
+  }
+}
 ```
 
 ## Alerts
@@ -255,7 +244,8 @@ Alerts can be configured per option to trigger when conditions are met.
 - Event emission for custom handling
 
 ### Emitted Events
-To handle the alert triggers, register a subscriber for the `statistics.alert` event type. 
+
+To handle alert triggers, register a subscriber for the `statistics.alert` event type.
 
 ```typescript
 type StatisticsAlertEventData = {
@@ -272,9 +262,11 @@ type StatisticsAlertEventData = {
 ```
 
 ## Caching
+
 In order to optimize performance, statistic results are cached for a configurable amount of time. When a statistic is requested, the module first checks if a valid cached result exists and returns it if available. If not, it calculates the statistic, stores the result in the cache, and then returns it.
 
 ### Cache Configuration
+
 To use caching, `CachingModule` must be enabled in the Medusa project.
 
 ```typescript
@@ -311,7 +303,16 @@ featureFlags: {
 }
 ```
 
-## Planned features and improvements
-- More built-in chart types and visualization options
-- Visualization providers for custom chart types and UI components
-- Visualization on entities' details pages (e.g. product statistics on product page)
+## Internationalization (i18n)
+
+The admin UI supports translation via the Medusa provided `react-i18next` package. Custom providers can provide translation keys for their functions and fields. The following keys are used for translation:
+
+- `sp_<provider-id>.name` - provider display name
+- `sp_<provider-id>.<stat-id>.name` - statistic display name
+- `sp_<provider-id>.<stat-id>.description` - statistic description
+- `sp_<provider-id>.<stat-id>.fields.<field-name>.name` - parameter field label
+- `sp_<provider-id>.<stat-id>.fields.<field-name>.options.<value>` - enum option label
+
+General admin UI keys can also be translated, please see the `src/admin/i18n` folder for the english translation file.
+
+

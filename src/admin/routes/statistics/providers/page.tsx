@@ -8,6 +8,7 @@ import {
 } from "@medusajs/ui"
 import { Adjustments as AdjustmentsHorizontal, ChevronDownMini, ChevronUpMini } from "@medusajs/icons"
 import { useQuery } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
 import { STATISTICS_QUERY } from "../../../lib/queries"
 import { listProviders, getProviderStatistics, type StatisticsProvider, AvailableStatistic } from "../../../lib/statistics/api"
 import { useState } from "react"
@@ -20,7 +21,9 @@ interface ProviderRowProps {
 }
 
 const ProviderRow = ({ provider, isExpanded, onToggle }: ProviderRowProps) => {
+    const { t } = useTranslation("stats")
     const statistics = provider?.statistics || []
+    const providerName = t(`${provider.id}.name`, provider.display_name || provider.id)
 
     return (
         <>
@@ -34,22 +37,14 @@ const ProviderRow = ({ provider, isExpanded, onToggle }: ProviderRowProps) => {
                             <AdjustmentsHorizontal className="text-ui-fg-muted" />
                         </div>
                         <div>
-                            <p className="font-medium">{provider.display_name || provider.id}</p>
-                            <p className="text-ui-fg-muted text-xs">
-                                {provider.id}
-                            </p>
+                            <p className="font-medium">{providerName}</p>
                         </div>
                     </div>
                 </Table.Cell>
                 <Table.Cell>
                     <span className="text-xs text-ui-fg-subtle">
-                        {statistics.length || 0} available
+                        {t("providers.statistics_count", { count: statistics.length })}
                     </span>
-                </Table.Cell>
-                <Table.Cell>
-                    <StatusBadge color={provider.is_enabled ? "green" : "grey"}>
-                        {provider.is_enabled ? "Active" : "Disabled"}
-                    </StatusBadge>
                 </Table.Cell>
                 <Table.Cell className="text-right">
                     {isExpanded ? (
@@ -63,30 +58,33 @@ const ProviderRow = ({ provider, isExpanded, onToggle }: ProviderRowProps) => {
                 <Table.Row className="bg-ui-bg-subtle hover:bg-ui-bg-subtle">
                     <Table.Cell {...{ colSpan: 4 }}>
                         <div className="space-y-2 py-4">
-                            <h4 className="text-sm font-medium mb-3">Available Statistics</h4>
+                            <h4 className="text-sm font-medium mb-3">
+                                {t("providers.available_statistics", "Available Data Sources")}
+                            </h4>
                             <div className="grid gap-2">
-                                {statistics.map((stat: AvailableStatistic) => (
-                                    <div
-                                        key={stat.id}
-                                        className="bg-ui-bg-base rounded-lg p-3 border border-ui-border-base"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <p className="font-medium text-sm">
-                                                    {stat.name || stat.id}
-                                                </p>
-                                                <p className="text-xs text-ui-fg-muted mt-1">
-                                                    {stat.id}
-                                                </p>
-                                                {stat.description && (
-                                                    <p className="text-xs text-ui-fg-subtle mt-2">
-                                                        {stat.description}
+                                {statistics.map((stat: AvailableStatistic) => {
+                                    const statName = t(`${provider.id}.${stat.id}.name`, stat.id)
+                                    const statDesc = t(`${provider.id}.${stat.id}.description`, "")
+                                    return (
+                                        <div
+                                            key={stat.id}
+                                            className="bg-ui-bg-base rounded-lg p-3 border border-ui-border-base"
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-sm">
+                                                        {statName}
                                                     </p>
-                                                )}
+                                                    {statDesc && (
+                                                        <p className="text-xs text-ui-fg-subtle mt-2">
+                                                            {statDesc}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </div>
                     </Table.Cell>
@@ -117,10 +115,11 @@ const LoadingRow = () => (
 )
 
 const ProvidersPage = () => {
+    const { t } = useTranslation("stats")
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
     const { data, isLoading } = useQuery({
-        queryFn: () => listProviders(),
+        queryFn: () => listProviders({ is_enabled: true }),
         queryKey: [STATISTICS_QUERY, "providers"],
     })
 
@@ -141,15 +140,14 @@ const ProvidersPage = () => {
     return (
         <Container className="divide-y p-0 overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4">
-                <Heading level="h2">Providers</Heading>
+                <Heading level="h2">{t("providers.title", "Providers")}</Heading>
             </div>
             <div className="overflow-x-auto">
                 <Table>
                     <Table.Header className="!border-none">
                         <Table.Row>
-                            <Table.HeaderCell>Provider</Table.HeaderCell>
-                            <Table.HeaderCell>Statistics</Table.HeaderCell>
-                            <Table.HeaderCell>Status</Table.HeaderCell>
+                            <Table.HeaderCell>{t("providers.table.provider", "Provider")}</Table.HeaderCell>
+                            <Table.HeaderCell>{t("providers.table.statistics", "Statistics")}</Table.HeaderCell>
                             <Table.HeaderCell></Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
@@ -172,7 +170,7 @@ const ProvidersPage = () => {
                         ) : (
                             <Table.Row>
                                 <Table.Cell {...{ colSpan: 4 }} className="text-center text-ui-fg-muted ">
-                                    No providers found
+                                    {t("providers.no_providers", "No providers found")}
                                 </Table.Cell>
                             </Table.Row>
                         )}
