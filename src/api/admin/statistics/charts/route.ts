@@ -23,7 +23,7 @@ export async function GET(
 
     if (view_id) {
         filters.view = { id: view_id };
-        if (!(await checkViewOwnership(req.scope, view_id, userId))) {
+        if (!(await checkViewOwnership(req.scope, view_id as string, userId))) {
             throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
         }
     }

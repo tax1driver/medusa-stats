@@ -1118,46 +1118,6 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
         };
     }
 
-    @StatFn("gaussian_random", {
-        schema: gaussianRandomSchema,
-        dimension: "time",
-        metadata: {
-            description: "Generate a Gaussian (normally distributed) random time series for testing and demo purposes.",
-        },
-    })
-    async gaussianRandom({ parameters, periodStart, periodEnd, interval }: StatCalculationInput): Promise<StatisticResult> {
-        const baseValue = parameters.base_value;
-        const standardDeviation = parameters.standard_deviation;
-        const trend = parameters.trend;
-        const seed = parameters.seed;
-
-        // Simple seeded PRNG (mulberry32)
-        const mulberry32 = (s: number) => {
-            let state = s | 0;
-            return () => {
-                state = state + 0x6D2B79F5 | 0;
-                let t = Math.imul(state ^ state >>> 15, 1 | state);
-                t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-                return ((t ^ t >>> 14) >>> 0) / 4294967296;
-            };
-        };
-        const rand = mulberry32(seed);
-
-        const intervals = generateIntervals(periodStart, periodEnd, interval);
-        let currentBase = baseValue;
-
-        const value = intervals.map((x) => {
-            // Box-Muller transform using seeded PRNG → Gaussian
-            const u1 = rand();
-            const u2 = rand();
-            const z = Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2);
-            const val = currentBase + z * standardDeviation;
-            currentBase += trend;
-            return { x, value: Math.round(val * 100) / 100 };
-        });
-
-        return { value };
-    }
 }
 
 export default ModuleProvider("statistics", { services: [CommonStatisticsProvider] });

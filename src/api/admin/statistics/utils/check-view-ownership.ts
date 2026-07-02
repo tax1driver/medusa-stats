@@ -23,6 +23,6 @@ export async function checkViewOwnership(
 
     if (!view.is_private) return true
 
-    const linkedUserIds = (view.user || []).map((u: any) => u.id)
-    return linkedUserIds.includes(userId)
+    const linkedUserId = view.user?.id;
+    return linkedUserId && linkedUserId === userId;
 }
