@@ -48,6 +48,7 @@ export const CreateViewSchema = z.object({
     period_type: z.enum(["rolling", "calendar", "custom"]).optional(),
     period_config: z.record(z.string(), z.any()).optional().nullable(),
     interval: z.number().optional(),
+    is_private: z.boolean().optional(),
     options: z.array(
         z.object({
             provider_id: z.string().min(1, "Provider ID is required"),

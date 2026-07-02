@@ -1,5 +1,5 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils";
 import { STATISTICS_MODULE } from "../../../../../modules/statistics";
 import StatisticsService from "../../../../../modules/statistics/service";
 import { updateViewConfigurationWorkflow } from "../../../../../workflows/statistics";
@@ -8,25 +8,42 @@ import type { UpdateViewInput } from "../../../../validation/statistics/schemas"
 import { logger } from "@medusajs/framework";
 
 
-
 export async function GET(
-    req: MedusaRequest,
+    req: AuthenticatedMedusaRequest,
     res: MedusaResponse
 ) {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
     const viewId = req.params.id;
+    const userId = req.auth_context.actor_id;
 
     const { data: views } = await query.graph(
         {
             entity: "statistics_view",
+            fields: [
+                "*",
+                "charts.*",
+                "charts.statistics.*",
+                "charts.statistics.provider.*",
+                "charts.statistics.input_dependencies.*",
+                "charts.statistics.input_dependencies.input_option.*",
+                "user.id",
+            ],
             filters: { id: viewId },
-            ...req.queryConfig,
         },
         { throwIfKeyNotFound: true }
     );
 
     const view = { ...views[0] };
 
+    if (view.is_private) {
+        const linkedUserId = view.user.id;
+        if (linkedUserId !== userId) {
+            throw new MedusaError(
+                MedusaError.Types.NOT_ALLOWED,
+                "You do not have access to this private view",
+            );
+        }
+    }
 
     const rootOptions: any[] = [];
 
@@ -57,14 +74,39 @@ export async function GET(
 
 
 export async function POST(
-    req: MedusaRequest<UpdateViewInput>,
+    req: AuthenticatedMedusaRequest<UpdateViewInput>,
     res: MedusaResponse
 ) {
+    const viewId = req.params.id;
+    const userId = req.auth_context.actor_id;
+
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const { data: userLinks } = await query.graph({
+        entity: "statistics_view",
+        fields: ["id", "is_private", "user.id"],
+        filters: { id: viewId },
+    });
+
+    const viewData = userLinks[0] as any;
+    if (!viewData) {
+        throw new MedusaError(MedusaError.Types.NOT_FOUND, "View not found");
+    }
+
+    if (viewData.is_private) {
+        const linkedUserId = viewData.user.id;
+        if (linkedUserId !== userId) {
+            throw new MedusaError(
+                MedusaError.Types.NOT_ALLOWED,
+                "You do not have access to this private view",
+            );
+        }
+    }
+
     const { description, stats_data, layout_config, period_type, period_config, interval, ...rest } = req.validatedBody;
 
     const { result } = await updateViewConfigurationWorkflow(req.scope).run({
         input: {
-            id: req.params.id,
+            id: viewId,
             ...rest,
             description: description || undefined,
             stats_data: stats_data || undefined,
@@ -80,12 +122,37 @@ export async function POST(
 
 
 export async function DELETE(
-    req: MedusaRequest,
+    req: AuthenticatedMedusaRequest,
     res: MedusaResponse
 ) {
+    const viewId = req.params.id;
+    const userId = req.auth_context.actor_id;
+
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const { data: userLinks } = await query.graph({
+        entity: "statistics_view",
+        fields: ["id", "is_private", "user.id"],
+        filters: { id: viewId },
+    });
+
+    const viewData = userLinks[0] as any;
+    if (!viewData) {
+        throw new MedusaError(MedusaError.Types.NOT_FOUND, "View not found");
+    }
+
+    if (viewData.is_private) {
+        const linkedUserId = viewData.user.id;
+        if (linkedUserId !== userId) {
+            throw new MedusaError(
+                MedusaError.Types.NOT_ALLOWED,
+                "You do not have access to this private view",
+            );
+        }
+    }
+
     const statisticsService = req.scope.resolve<StatisticsService>(STATISTICS_MODULE);
 
-    await statisticsService.deleteStatisticsViews(req.params.id);
+    await statisticsService.deleteStatisticsViews(viewId);
 
-    res.json({ id: req.params.id, deleted: true });
+    res.json({ id: viewId, deleted: true });
 }

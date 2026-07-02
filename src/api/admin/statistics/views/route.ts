@@ -1,21 +1,23 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { createViewWithOptionsWorkflow } from "../../../../workflows/statistics";
 import type { CreateViewInput, ListViewsQuery } from "../../../validation/statistics/schemas";
 
-
 export async function GET(
-    req: MedusaRequest<ListViewsQuery>,
+    req: AuthenticatedMedusaRequest<ListViewsQuery>,
     res: MedusaResponse
 ) {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
 
     const {
         q,
-        order,
-        limit = 20,
-        offset = 0,
+        limit: rawLimit,
+        offset: rawOffset,
     } = req.validatedQuery;
+
+    const limit = Number(rawLimit) || 10;
+    const offset = Number(rawOffset) || 0;
 
     const filters: Record<string, any> = {};
 
@@ -27,40 +29,53 @@ export async function GET(
         ];
     }
 
-    const numericOffset = Number(offset) || 0;
-    const numericLimit = Number(limit) || 20;
-    const sortField = typeof order === "string" && order.length > 0
-        ? (order.startsWith("-") ? order.slice(1) : order)
-        : "updated_at";
-    const sortDirection = typeof order === "string" && order.startsWith("-") ? "DESC" : "ASC";
+    const results: any[] = [];
+    let totalSkipped = 0;
 
-    const { data: views, metadata } = await query.graph({
-        entity: "statistics_view",
-        ...req.queryConfig,
-        filters,
-        pagination: {
-            take: numericLimit,
-            skip: numericOffset,
-            order: {
-                [sortField]: sortDirection,
+    while (results.length < limit) {
+        const { data: batch } = await query.graph({
+            entity: "statistics_view",
+            fields: [
+                ...(req.queryConfig.fields || []),
+                "is_private",
+                "user.*",
+            ],
+            filters,
+            pagination: {
+                take: Math.max(limit, 50),
+                skip: offset + totalSkipped + results.length,
             },
-        },
-    });
+        });
+
+        if (batch.length === 0) break;
+
+        for (const view of batch) {
+            const linkedUsers = Array.isArray(view.user) ? view.user : [view.user];
+            if (view.is_private && !linkedUsers.some((u: any) => u?.id === userId)) {
+                totalSkipped++;
+                continue;
+            }
+            if (results.length < limit) {
+                results.push(view);
+            }
+        }
+
+        if (batch.length < Math.max(limit, 50)) break;
+    }
 
     res.json({
-        views,
-        count: metadata?.count ?? views.length,
-        limit: numericLimit,
-        offset: numericOffset,
+        views: results,
+        count: results.length + totalSkipped,
     });
 }
 
 
 export async function POST(
-    req: MedusaRequest<CreateViewInput>,
+    req: AuthenticatedMedusaRequest<CreateViewInput>,
     res: MedusaResponse
 ) {
-    const { options, description, stats_data, layout_config, period_type, period_config, interval, ...rest } = req.validatedBody;
+    const { options, description, stats_data, layout_config, period_type, period_config, interval, is_private, ...rest } = req.validatedBody;
+    const userId = req.auth_context.actor_id;
 
     const { result } = await createViewWithOptionsWorkflow(req.scope).run({
         input: {
@@ -72,6 +87,8 @@ export async function POST(
                 period_type: period_type || undefined,
                 period_config: period_config || undefined,
                 interval: interval || undefined,
+                is_private: is_private ?? false,
+                created_by: userId,
             },
             options: (options || []).map(opt => ({
                 provider_id: opt.provider_id,

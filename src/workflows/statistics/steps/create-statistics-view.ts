@@ -1,6 +1,7 @@
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
 import { STATISTICS_MODULE } from "../../../modules/statistics";
 import StatisticsService from "../../../modules/statistics/service";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 
 export interface CreateStatisticsViewInput {
     name: string;
@@ -11,6 +12,8 @@ export interface CreateStatisticsViewInput {
     period_type?: "rolling" | "calendar" | "custom";
     period_config?: Record<string, any>;
     interval?: number;
+    is_private?: boolean;
+    created_by?: string;
 }
 
 export const createStatisticsViewStep = createStep(
@@ -19,6 +22,18 @@ export const createStatisticsViewStep = createStep(
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);
 
         const view = await statisticsService.createStatisticsViews(input);
+
+        if (input.created_by) {
+            const link = container.resolve(ContainerRegistrationKeys.LINK);
+            await link.create({
+                [STATISTICS_MODULE]: {
+                    statistics_view_id: view.id,
+                },
+                [Modules.USER]: {
+                    user_id: input.created_by,
+                },
+            });
+        }
 
         return new StepResponse(view, view.id);
     },

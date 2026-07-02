@@ -1,16 +1,31 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils";
 import { STATISTICS_MODULE } from "../../../../../modules/statistics";
 import StatisticsService from "../../../../../modules/statistics/service";
 import type { UpdateOptionInput } from "../../../../validation/statistics/schemas";
 import { hydrateOptionsWithDependencies } from "../../utils/option-graph";
+import { checkViewOwnership } from "../../utils/check-view-ownership";
 
 
 export async function GET(
-    req: MedusaRequest,
+    req: AuthenticatedMedusaRequest,
     res: MedusaResponse
 ) {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
+
+    const { data: optionView } = await query.graph({
+        entity: "statistics_option",
+        fields: ["id", "view.id"],
+        filters: { id: req.params.id },
+    });
+
+    const viewId = (optionView[0] as any)?.view?.id;
+    if (viewId) {
+        if (!(await checkViewOwnership(req.scope, viewId, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
+    }
 
     const { data: options } = await query.graph(
         {
@@ -28,10 +43,25 @@ export async function GET(
 
 
 export async function POST(
-    req: MedusaRequest<UpdateOptionInput>,
+    req: AuthenticatedMedusaRequest<UpdateOptionInput>,
     res: MedusaResponse
 ) {
     const statisticsService = req.scope.resolve<StatisticsService>(STATISTICS_MODULE);
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
+
+    const { data: optionView } = await query.graph({
+        entity: "statistics_option",
+        fields: ["id", "view.id"],
+        filters: { id: req.params.id },
+    });
+
+    const viewId = req.validatedBody.view_id || (optionView[0] as any)?.view?.id;
+    if (viewId) {
+        if (!(await checkViewOwnership(req.scope, viewId, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
+    }
 
     const updateData: any = {
         id: req.params.id,
@@ -71,15 +101,28 @@ export async function POST(
 }
 
 export async function DELETE(
-    req: MedusaRequest,
+    req: AuthenticatedMedusaRequest,
     res: MedusaResponse
 ) {
     const statisticsService = req.scope.resolve<StatisticsService>(STATISTICS_MODULE);
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
+
+    const { data: optionView } = await query.graph({
+        entity: "statistics_option",
+        fields: ["id", "view.id"],
+        filters: { id: req.params.id },
+    });
+
+    const viewId = (optionView[0] as any)?.view?.id;
+    if (viewId) {
+        if (!(await checkViewOwnership(req.scope, viewId, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
+    }
 
 
     await statisticsService.validateOptionDeletion(req.params.id);
-
-
     await statisticsService.deleteStatisticsOptions(req.params.id);
 
     res.json({ id: req.params.id, deleted: true });

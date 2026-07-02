@@ -1,11 +1,29 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils";
 import { manageChartStatisticsWorkflow } from "../../../../../../workflows/statistics";
+import { checkViewOwnership } from "../../../utils/check-view-ownership";
 
 
 export async function PUT(
-    req: MedusaRequest<{ statistic_ids: string[] }>,
+    req: AuthenticatedMedusaRequest<{ statistic_ids: string[] }>,
     res: MedusaResponse
 ) {
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
+
+    const { data: chartView } = await query.graph({
+        entity: "statistics_chart",
+        fields: ["id", "view.id"],
+        filters: { id: req.params.id },
+    });
+
+    const viewId = (chartView[0] as any)?.view?.id;
+    if (viewId) {
+        if (!(await checkViewOwnership(req.scope, viewId, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
+    }
+
     const { statistic_ids } = req.validatedBody;
 
     await manageChartStatisticsWorkflow(req.scope).run({
@@ -23,9 +41,24 @@ export async function PUT(
 
 
 export async function DELETE(
-    req: MedusaRequest<{ statistic_ids: string[] }>,
+    req: AuthenticatedMedusaRequest<{ statistic_ids: string[] }>,
     res: MedusaResponse
 ) {
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
+    const { data: chartView } = await query.graph({
+        entity: "statistics_chart",
+        fields: ["id", "view.id"],
+        filters: { id: req.params.id },
+    });
+
+    const viewId = (chartView[0] as any)?.view?.id;
+    if (viewId) {
+        if (!(await checkViewOwnership(req.scope, viewId, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
+    }
+
     const { statistic_ids } = req.validatedBody;
 
     await manageChartStatisticsWorkflow(req.scope).run({

@@ -815,7 +815,7 @@ const ViewDetailPage = () => {
     const [periodStart, setPeriodStart] = useState(() => {
         const date = new Date()
         date.setDate(date.getDate() - 30)
-        return date.toISOString().split('T')[0]
+        return date.toJSON()
     })
     const [periodEnd, setPeriodEnd] = useState(() => {
         return new Date().toISOString().split('T')[0]
@@ -890,6 +890,7 @@ const ViewDetailPage = () => {
         const now = new Date()
         let start = new Date()
         let end = new Date()
+        end.setHours(23, 59, 59, 999)
 
         if (type === 'rolling' && config.count && config.unit) {
             const { count, unit } = config
@@ -985,8 +986,8 @@ const ViewDetailPage = () => {
         const { start, end } = calculateDatesFromConfig(type, config)
 
 
-        setPeriodStart(start.toISOString().split('T')[0])
-        setPeriodEnd(end.toISOString().split('T')[0])
+        setPeriodStart(start.toJSON())
+        setPeriodEnd(end.toJSON())
         setCurrentPeriodType(type)
         setCurrentPeriodConfig(config)
         setHasUnsavedChanges(true)
@@ -1034,12 +1035,10 @@ const ViewDetailPage = () => {
             setSavedPeriodConfig(view.period_config)
 
             const { start, end } = calculateDatesFromConfig(view.period_type, view.period_config)
-            const startStr = start.toISOString().split('T')[0]
-            const endStr = end.toISOString().split('T')[0]
-            setPeriodStart(startStr)
-            setPeriodEnd(endStr)
-            setSavedPeriodStart(startStr)
-            setSavedPeriodEnd(endStr)
+            setPeriodStart(start.toJSON())
+            setPeriodEnd(end.toJSON())
+            setSavedPeriodStart(start.toJSON())
+            setSavedPeriodEnd(end.toJSON())
 
             if (view.period_type === 'custom') {
                 setIsCustomPeriod(true)

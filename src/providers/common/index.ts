@@ -10,6 +10,7 @@ import {
     sum,
     average,
     createQueryTimeSeries,
+    generateIntervals,
 } from "medusa-stats";
 import { logger } from "@medusajs/framework";
 
@@ -136,6 +137,13 @@ const productsSoldCountSchema = z.object({
 const outOfStockVariantsSchema = z.object({
     location_id: z.string().optional(),
     threshold: z.number().min(0).default(0),
+});
+
+const gaussianRandomSchema = z.object({
+    base_value: z.number().default(100),
+    standard_deviation: z.number().min(0.1).max(1000).default(15),
+    trend: z.number().min(-50).max(50).default(0),
+    seed: z.number().int().default(42),
 });
 
 
@@ -976,23 +984,24 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
         const metric = parameters.metric;
 
         const { data: lineItems } = await this.query.graph({
-            entity: "order_line_item",
-            fields: ["id", "variant_id", "title", "quantity", "subtotal"],
+            entity: "order_item",
+            fields: ["id", "*", "item.*"],
             filters: {
                 created_at: { $gte: periodStart, $lte: periodEnd },
             },
         });
 
         const variantMetrics: Record<string, { title: string; quantity: number; revenue: number }> = {};
-
+        console.dir(lineItems, { depth: null });
         for (const item of lineItems) {
-            const variantId = item.variant_id || "unknown";
+            const variantId = item.item.variant_id;
             if (!variantMetrics[variantId]) {
-                variantMetrics[variantId] = { title: item.title || variantId, quantity: 0, revenue: 0 };
+                variantMetrics[variantId] = { title: `${item.item.title} (${item.item.subtitle})` || variantId, quantity: 0, revenue: 0 };
             }
             variantMetrics[variantId].quantity += item.quantity || 0;
-            variantMetrics[variantId].revenue += item.subtotal || 0;
+            variantMetrics[variantId].revenue += item.quantity * item.unit_price || 0;
         }
+
 
         const sorted = Object.entries(variantMetrics)
             .sort(([, a], [, b]) => {
@@ -1107,6 +1116,47 @@ class CommonStatisticsProvider extends AbstractStatisticsProvider {
             value: [{ x: new Date().toISOString(), value: inventoryLevels.length }],
             metadata: { count: inventoryLevels.length },
         };
+    }
+
+    @StatFn("gaussian_random", {
+        schema: gaussianRandomSchema,
+        dimension: "time",
+        metadata: {
+            description: "Generate a Gaussian (normally distributed) random time series for testing and demo purposes.",
+        },
+    })
+    async gaussianRandom({ parameters, periodStart, periodEnd, interval }: StatCalculationInput): Promise<StatisticResult> {
+        const baseValue = parameters.base_value;
+        const standardDeviation = parameters.standard_deviation;
+        const trend = parameters.trend;
+        const seed = parameters.seed;
+
+        // Simple seeded PRNG (mulberry32)
+        const mulberry32 = (s: number) => {
+            let state = s | 0;
+            return () => {
+                state = state + 0x6D2B79F5 | 0;
+                let t = Math.imul(state ^ state >>> 15, 1 | state);
+                t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            };
+        };
+        const rand = mulberry32(seed);
+
+        const intervals = generateIntervals(periodStart, periodEnd, interval);
+        let currentBase = baseValue;
+
+        const value = intervals.map((x) => {
+            // Box-Muller transform using seeded PRNG → Gaussian
+            const u1 = rand();
+            const u2 = rand();
+            const z = Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2);
+            const val = currentBase + z * standardDeviation;
+            currentBase += trend;
+            return { x, value: Math.round(val * 100) / 100 };
+        });
+
+        return { value };
     }
 }
 

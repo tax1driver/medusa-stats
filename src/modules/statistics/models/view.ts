@@ -13,6 +13,7 @@ const StatisticsView = model.define("statistics_view", {
     period_config: model.json().nullable(),
     interval: model.number().nullable(),
     cache_options: model.json().nullable(),
+    is_private: model.boolean().default(false),
     layout_config: model.json().default({
         preset: "compact"
     }),

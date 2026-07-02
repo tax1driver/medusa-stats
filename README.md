@@ -30,6 +30,7 @@
 - Composite statistics (statistics depending on other statistics)
 - Statistics-triggered configurable alerts
 - Admin UI with i18n support
+- Widget for embedding statistics in the admin dashboard
 - Caching for optimized performance
 
 ## Installation
@@ -99,7 +100,7 @@ The module supports multiple built-in chart types, selectable per series:
 
 ## Providers
 
-Providers define what statistics are available and how they are calculated. Each statistic is defined using the `@StatFn` decorator with a Zod parameter schema.
+Providers define what data is available via the providers. Each source is defined using the `@StatFn` decorator with a Zod parameter schema.
 
 ### Add provider to project
 
@@ -308,8 +309,8 @@ featureFlags: {
 The admin UI supports translation via the Medusa provided `react-i18next` package. Custom providers can provide translation keys for their functions and fields. The following keys are used for translation:
 
 - `sp_<provider-id>.name` - provider display name
-- `sp_<provider-id>.<stat-id>.name` - statistic display name
-- `sp_<provider-id>.<stat-id>.description` - statistic description
+- `sp_<provider-id>.<stat-id>.name` - function display name
+- `sp_<provider-id>.<stat-id>.description` - function description
 - `sp_<provider-id>.<stat-id>.fields.<field-name>.name` - parameter field label
 - `sp_<provider-id>.<stat-id>.fields.<field-name>.options.<value>` - enum option label
 

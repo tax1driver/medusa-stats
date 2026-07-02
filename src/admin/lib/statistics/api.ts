@@ -87,11 +87,20 @@ export type StatisticsView = {
     period_config: Record<string, any> | null
     interval: number | null
     cache_options: { enabled?: boolean; ttl?: number } | null
+    is_private: boolean
     metadata: Record<string, any> | null
     created_at: string
     updated_at: string
+    user?: AdminUser | AdminUser[]
     statistics?: StatisticsOption[]
     charts?: StatisticsChart[]
+}
+
+export type AdminUser = {
+    id: string
+    first_name: string | null
+    last_name: string | null
+    email: string
 }
 
 export type StatisticsOption = {
@@ -228,6 +237,7 @@ export const createView = async (data: {
     description?: string
     stats_data?: Record<string, any>
     layout_config?: Record<string, any>
+    is_private?: boolean
     options?: Array<{
         provider_id: string
         statistic_key: string

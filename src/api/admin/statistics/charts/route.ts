@@ -1,13 +1,15 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework";
+import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { CreateChartInput, ListChartsQuery } from "../../../../api/validation/statistics/schemas";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils";
 import { createChartWorkflow } from "../../../../workflows/statistics";
+import { checkViewOwnership } from "../utils/check-view-ownership";
 
 export async function GET(
-    req: MedusaRequest<ListChartsQuery>,
+    req: AuthenticatedMedusaRequest<ListChartsQuery>,
     res: MedusaResponse
 ) {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const userId = req.auth_context.actor_id;
 
     const {
         view_id,
@@ -21,6 +23,9 @@ export async function GET(
 
     if (view_id) {
         filters.view = { id: view_id };
+        if (!(await checkViewOwnership(req.scope, view_id, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
     }
 
     if (typeof q === "string" && q.trim().length > 0) {
@@ -60,10 +65,17 @@ export async function GET(
 }
 
 export async function POST(
-    req: MedusaRequest<CreateChartInput>,
+    req: AuthenticatedMedusaRequest<CreateChartInput>,
     res: MedusaResponse
 ) {
     const chartData = req.validatedBody;
+    const userId = req.auth_context.actor_id;
+
+    if (chartData.view_id) {
+        if (!(await checkViewOwnership(req.scope, chartData.view_id, userId))) {
+            throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "You do not have access to this private view");
+        }
+    }
 
     const { result } = await createChartWorkflow(req.scope).run({
         input: {

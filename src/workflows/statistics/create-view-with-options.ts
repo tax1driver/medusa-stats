@@ -14,6 +14,8 @@ export interface CreateViewWithOptionsInput {
         period_type?: "rolling" | "calendar" | "custom";
         period_config?: Record<string, any>;
         interval?: number;
+        is_private?: boolean;
+        created_by?: string;
     };
     options: Array<{
         provider_option_name: string;
