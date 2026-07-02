@@ -270,23 +270,6 @@ const CreateViewModal = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
         },
     })
 
-    const { data: statisticsData } = useQuery({
-        queryKey: [STATISTICS_QUERY, "providers", "all-statistics"],
-        queryFn: () => getAllProviderStatistics(),
-    })
-
-
-    const groupedStatistics = useMemo(() => {
-        if (!statisticsData?.statistics) return {}
-
-        return statisticsData.statistics.reduce((acc, stat) => {
-            if (!acc[stat.provider_id]) {
-                acc[stat.provider_id] = []
-            }
-            acc[stat.provider_id].push(stat)
-            return acc
-        }, {} as Record<string, (AvailableStatistic & { provider_name: string })[]>)
-    }, [statisticsData])
 
     const createMutation = useMutation({
         mutationFn: (data: ViewFormData & {
@@ -314,30 +297,12 @@ const CreateViewModal = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
         },
     })
 
-    const handleAddStatistic = (providerId: string, statistic: AvailableStatistic) => {
-        setSelectedStatistics([
-            ...selectedStatistics,
-            {
-                provider_id: providerId,
-                statistic,
-                data: {},
-            }
-        ])
-    }
-
-    const handleRemoveStatistic = (index: number) => {
-        setSelectedStatistics(selectedStatistics.filter((_, i) => i !== index))
-    }
-
     const onSubmit = (data: ViewFormData) => {
-        let layoutConfig: Record<string, any> | undefined = undefined
 
         if (layoutConfigText.trim()) {
             try {
                 const parsed = JSON.parse(layoutConfigText)
-                if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-                    layoutConfig = parsed
-                } else {
+                if (!(parsed && typeof parsed === "object" && !Array.isArray(parsed))) {
                     toast.error("Invalid layout config", {
                         description: "Layout config must be a JSON object",
                     })

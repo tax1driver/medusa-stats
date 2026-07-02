@@ -33,10 +33,10 @@
     "medusa",
     "plugin",
     "medusa-plugin-stats",
-    "medusa-plugin-metrics",
     "medusa-plugin",
     "medusa-plugin-analytics",
-    "medusa-v2"
+    "medusa-v2",
+    "medusa-plugin-other"
   ],
   "scripts": {
     "build": "medusa plugin:build",

@@ -23,7 +23,7 @@ export const createStatisticsOptionsStep = createStep(
             createdOptions.map((opt: any) => opt.id)
         );
     },
-    async (optionIds: string[], { container }) => {
+    async (optionIds: string[] | undefined, { container }) => {
         if (!optionIds || optionIds.length === 0) return;
 
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);

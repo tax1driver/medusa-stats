@@ -37,7 +37,7 @@ export const createStatisticsViewStep = createStep(
 
         return new StepResponse(view, view.id);
     },
-    async (viewId: string, { container }) => {
+    async (viewId: string | undefined, { container }) => {
         if (!viewId) return;
 
         const statisticsService = container.resolve<StatisticsService>(STATISTICS_MODULE);

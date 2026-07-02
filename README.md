@@ -194,7 +194,7 @@ The package exports several data-processing utilities from `medusa-stats`:
 
 ## Composite Statistics
 
-Composite statistics allow one statistic option to use another option's output as an input. This is configured by setting **Input Dependencies** in the option editor — map a dependency to a parameter name.
+Composite statistics allow one option to use another option's output as an input. This is configured by setting **Input Dependencies** in the option editor — map a dependency to a parameter name.
 
 ### Admin Usage
 
